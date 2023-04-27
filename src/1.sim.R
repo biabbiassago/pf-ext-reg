@@ -63,8 +63,8 @@ for(j in 1:OBS){
 names(rep_data)<- c(1:OBS)
 
 df <- data.frame(
-    x_coords = x_coords,
-    y_coords=y_coords,
+    x_coords = rep(x_coords, each=n_coords),
+    y_coords= rep(y_coords, n_coords),
     rep_data,
     x = X
   ) %>%
@@ -75,9 +75,8 @@ df <- data.frame(
   mutate(measurements = parse_number(measurements)) %>%
   mutate(station = rep(1:N,each=OBS))
 
-
+# quick check?
 par(mfrow=c(3,2))
-
 for(i in c(1:6)){
   image.plot(
     x_coords,
@@ -87,10 +86,20 @@ for(i in c(1:6)){
   ) + title(paste("True Data, Meas:",i))
 }
 
-head(df)
-
-
 write.csv(
   df,
   file="data/sim1.csv"
 )
+
+## this is for one station???
+library(extRemes)
+station1 <- df %>% filter(station==1)
+fit1 <- fevd(value~1,data=station1)
+# location: 8.166, scale = 1.05, shape = -0.117
+plot(fit1)
+
+fitoverall <- fevd(value~1,data=df)
+# Estimated parameters:
+#  location     scale     shape 
+# -8.337301  5.059122 -0.070127 
+
