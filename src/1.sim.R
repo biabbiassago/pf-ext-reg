@@ -73,7 +73,7 @@ df <- data.frame(
     names_to = "measurements"
   ) %>%
   mutate(measurements = parse_number(measurements)) %>%
-  mutate(station = rep(1:100,each=OBS))
+  mutate(station = rep(1:N,each=OBS))
 
 
 par(mfrow=c(3,2))
