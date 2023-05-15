@@ -1,66 +1,36 @@
-" Simulate a Gaussian Spatial Process with Exponential covariance fnct "
-set.seed(4649)
+" Simulate a Spatial Process for the MAX- with Exponential covariance fnct "
+set.seed(123)
 library(tidyverse)
 library(MASS)
 library(fields)
-
-SIGMA2 <- 1
-PHI <- 2
-BETA1 <- 10
-OBS <- 30
-
-# define exponential covariance function
-exp_cov <- function(sigma2,phi, distp){
-    return(
-      (sigma2*exp(-(distp/phi)))
-    )
-}
-
-# generate locations on 10X10 grid
-x_coords <- seq(0.1,1,by=0.1)
-y_coords <- seq(0.1,1,by=0.1)
-n_coords <- length(x_coords)
-
-coords <- expand.grid(x_coords,y_coords)
-N <- dim(coords)[1]
-# plot(coords[,1],coords[,2])
-
-distance_mat <- fields::rdist(coords)
-# dim(distance_mat)
-
-# todo: fix so you don't do double calcs...
-Sigma_exp <- matrix(0,nrow=N,ncol=N)
-for(i in 1:N){
-  for(j in 1:N){
-    Sigma_exp[i,j] <- exp_cov(SIGMA2,PHI,distance_mat[i,j])
-  }
-}
+source("src/utils.R")
 
 X <- mvrnorm(
   1,
   mu = rep(1,N),
-  Sigma=Sigma_exp
+  Sigma=Sigma_x
 )
 
 eta <- mvrnorm(
   1,
   mu = rep(0,N),
-  Sigma=Sigma_exp
+  Sigma=Sigma_eta
 )
 
-## check?????
+rep_data <- matrix(NA, nrow=N, ncol=MONTHS)
 
-rep_data <- matrix(NA, nrow=N, ncol=OBS)
-
-for(j in 1:OBS){
+for(j in 1:MONTHS){
+  
+  # generate 30 OBS "per day" per station (100 stations)
   gau_process <- mvrnorm(
-    1,
+    OBS,
     mu=BETA1*X+eta,
-    Sigma=Sigma_exp
+    Sigma=diag(N)
   )
-  rep_data[,j] <- gau_process
+  # get the max by each station (100 stations) for that "month"
+  max_obs <- apply(gau_process, 2, max)
+  rep_data[,j] <- max_obs
 }
-names(rep_data)<- c(1:OBS)
 
 df <- data.frame(
     x_coords = rep(x_coords, each=n_coords),
@@ -73,17 +43,24 @@ df <- data.frame(
     names_to = "measurements"
   ) %>%
   mutate(measurements = parse_number(measurements)) %>%
-  mutate(station = rep(1:N,each=OBS))
+  mutate(station = rep(1:N,each=MONTHS))
 
-# quick check?
-par(mfrow=c(3,2))
-for(i in c(1:6)){
+
+# plot examples, by staton for all measurements 
+# just a few stations
+df %>% filter(station %in% 1:12) %>% ggplot(aes(x=value)) + geom_density() + facet_wrap(~station) + theme_bw()
+
+#df %>% ggplot(aes(x=value)) + geom_density() + facet_wrap(~station) + theme_bw()
+
+# quick check for four month
+par(mfrow=c(2,2))
+for(i in c(1:4)){
   image.plot(
     x_coords,
     y_coords, 
     matrix(rep_data[,i], n_coords,n_coords),
     col=terrain.colors(100)
-  ) + title(paste("True Data, Meas:",i))
+  ) + title(paste("True Data, measurements:",i))
 }
 
 write.csv(
@@ -91,12 +68,18 @@ write.csv(
   file="data/sim1.csv"
 )
 
+
 ## this is for one station???
 library(extRemes)
 station1 <- df %>% filter(station==1)
 fit1 <- fevd(value~1,data=station1)
-# location: 8.166, scale = 1.05, shape = -0.117
+# location      scale      shape 
+# 16.5786462  0.4848307 -0.3521654 
 plot(fit1)
+
+
+station1 <- df %>% filter(station==1)
+fit1 <- fevd(value~x,data=station1)
 
 fitoverall <- fevd(value~1,data=df)
 # Estimated parameters:
