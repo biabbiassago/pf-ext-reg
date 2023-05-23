@@ -21,11 +21,11 @@ x_coords <- seq(0.1,1,by=0.1)
 y_coords <- seq(0.1,1,by=0.1)
 n_coords <- length(x_coords)
 
-coords <- expand.grid(x_coords,y_coords)
-N <- dim(coords)[1]
+true_coords <- expand.grid(x_coords,y_coords)
+N <- dim(true_coords)[1]
 # plot(coords[,1],coords[,2])
 
-distance_mat <- fields::rdist(coords)
+distance_mat <- fields::rdist(true_coords)
 # dim(distance_mat)
 
 # fix so you don't do double calcs...

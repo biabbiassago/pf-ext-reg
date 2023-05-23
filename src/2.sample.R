@@ -5,7 +5,6 @@ set.seed(3523)
 
 ##### Auxiliary function ####
 generate_sampling_probs <- function(b,dat){
-  S_eta <- SIGMA2 * exp(-(distance_mat/PHI))
   n <- length(dat$x)
 
   ### check

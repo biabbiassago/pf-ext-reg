@@ -1,4 +1,6 @@
-today<-"0512"
+library(extRemes)
+
+today<-"05172"
 
 
 source("src/utils.R")
@@ -6,12 +8,13 @@ source("src/2.sample.R")
 source("src/3.evr_bystation.R")
 
 nsims <- 100
-proposed_b <- c(5,3,0)
+proposed_b <- c(5,3,1,0)
 
 loc_rmse_fullsim <- function(b, mean_by_station, true_data){
   # given a data-set and a b "strength of preferential sampling - run"
+  full_parms_est <- estimate_parms(true_data)
   xb <- prefsamp_station(b,mean_by_station, true_data)
-  evr_pred_df <- main_est_loc(xb$sample_df,true_data)
+  evr_pred_df <- main_est_loc(xb$sample_df,true_data,full_parms_est)
   return(evr_pred_df$rmse)
 }
 
@@ -28,7 +31,7 @@ mean_by_station <- true_data %>%
 )
 
 
-rmse_results <- matrix(NA,nrow=nsims,ncol=3)
+rmse_results <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
 for(b in proposed_b){
   print(b)
   rmse_results[,which(proposed_b == b)] <- replicate(
@@ -40,25 +43,21 @@ colnames(rmse_results) <- proposed_b
 
 ### SUMMARIZE RESULTS
 
-par(mfrow=c(1,3))
+par(mfrow=c(2,2))
 for(b in proposed_b){
   hist(rmse_results[,as.character(b)],main=paste("B=",b),xlab="RMSE")
-  abline(v=mean(rmse_results[,as.character(b)]),col="red")
+  abline(v=mean(rmse_results[,4]),col="red")
 }
 
-apply(rmse_results,2,mean,na.rm=TRUE)
-apply(rmse_results,2,max,na.rm=TRUE)
-apply(rmse_results,2,min,na.rm=TRUE)
-apply(rmse_results,2,var,na.rm=TRUE)
+meanres <- apply(rmse_results,2,mean,na.rm=TRUE)
+maxres <- apply(rmse_results,2,max,na.rm=TRUE)
+minres <- apply(rmse_results,2,min,na.rm=TRUE)
+varres<- apply(rmse_results,2,var,na.rm=TRUE)
 
-#saveRDS(rmse_results, paste0("outputs/rmse_loc",today,".rds"))
+resrmse <- data.frame(meanres,maxres,minres,varres)
+kableExtra::kbl(resrmse,col.names=c("Mean","Max","Min","Var"),format="latex",booktabs=TRUE,digits = 3)
 
-## Q???
 
 
-# EXAMPLE ERROR
-# [1] 0
-# model   psill      range
-# 1   Exp 35.4051 -0.8453095
-# Error in load.variogram.model(object$model[[name]], c(i - 1, i - 1), max_dist = max_dist) : 
-#   variogram range can never be negative
+
+saveRDS(rmse_results, paste0("outputs/rmse_loc",today,".rds"))
