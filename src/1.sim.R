@@ -48,14 +48,15 @@ df <- data.frame(
 
 # plot examples, by staton for all measurements 
 # just a few stations
-df %>% filter(station %in% 1:12) %>% ggplot(aes(x=value)) + geom_density() + facet_wrap(~station) + theme_bw()
+df %>%
+  filter(station %in% 1:12) %>%
+  ggplot(aes(x=value)) + 
+  geom_density() + facet_wrap(~station) + theme_bw() + xlab("Y") + ggtitle("Distribution of monthly max by station \nTruth Data") 
 
-#df %>% ggplot(aes(x=value)) + geom_density() + facet_wrap(~station) + theme_bw()
-
-# quick check for four month
-par(mfrow=c(2,2))
-for(i in c(1:4)){
-  image.plot(
+# quick check for nine month
+par(mfrow=c(3,3))
+for(i in c(1:9)){
+  fields::image.plot(
     x_coords,
     y_coords, 
     matrix(rep_data[,i], n_coords,n_coords),
@@ -69,20 +70,22 @@ write.csv(
 )
 
 
+
+
 ## this is for one station???
-library(extRemes)
-station1 <- df %>% filter(station==1)
-fit1 <- fevd(value~1,data=station1)
-# location      scale      shape 
-# 16.5786462  0.4848307 -0.3521654 
-plot(fit1)
-
-
-station1 <- df %>% filter(station==1)
-fit1 <- fevd(value~x,data=station1)
-
-fitoverall <- fevd(value~1,data=df)
-# Estimated parameters:
-#  location     scale     shape 
-# -8.337301  5.059122 -0.070127 
-
+# library(extRemes)
+# station1 <- df %>% filter(station==1)
+# fit1 <- fevd(value~1,data=station1)
+# # location      scale      shape 
+# # 16.5786462  0.4848307 -0.3521654 
+# plot(fit1)
+# 
+# 
+# station1 <- df %>% filter(station==1)
+# fit1 <- fevd(value~x,data=station1)
+# 
+# fitoverall <- fevd(value~1,data=df)
+# # Estimated parameters:
+# #  location     scale     shape 
+# # -8.337301  5.059122 -0.070127 
+# 

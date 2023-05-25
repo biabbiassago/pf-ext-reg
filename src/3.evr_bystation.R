@@ -1,3 +1,4 @@
+
 library(geoR)
 library(patchwork)
 library(sp)
@@ -103,28 +104,29 @@ make_results_df <- function(true_data, cur_sample, loc_predicted, full_parms_est
     )
   return(df)
 }
-plot_actvpred_loc <- function(actvpred_df){
+plot_actvpred_loc <- function(actvpred_df,b){
   # takes a df in format actvpred and makes plot to show actual vs predicted and sampled 
   # units
-  p1 <- ggplot(actvpred_df, aes(x = x_coords, y = y_coords, fill = loc_par_est)) + 
+  p1 <- ggplot(actvpred_df, aes(x = x_coords, y = y_coords, fill = loc_par_pred)) + 
     geom_raster() +
     xlab("x") + 
     ylab("y") + 
-    scale_fill_viridis_c(option="viridis",direction=-1) +
-    theme_bw()
+    scale_fill_viridis_c(option="viridis",direction=-1,name="mu") +
+    theme_bw() + 
+    ggtitle(paste("Interpolated mu for B=",b))
   
-  p2 <- ggplot(actvpred_df, aes(x=x_coords, y=y_coords, fill = loc_par_pred)) +   geom_raster() +
-    xlab("x") + 
-    ylab("y") + 
-    scale_fill_viridis_c(option="viridis",direction=-1) +
-    theme_bw()
+  # p2 <- ggplot(actvpred_df, aes(x=x_coords, y=y_coords, fill = loc_par_est)) +   geom_raster() +
+  #   xlab("x") + 
+  #   ylab("y") + 
+  #   scale_fill_viridis_c(option="viridis",direction=-1) +
+  #   theme_bw()
+  # 
+  # p3 <- ggplot(actvpred_df, aes(x=x_coords, y=y_coords, fill = sampled)) +   geom_raster() +
+  #   xlab("x") + 
+  #   ylab("y") + 
+  #   theme_bw()
   
-  p3 <- ggplot(actvpred_df, aes(x=x_coords, y=y_coords, fill = sampled)) +   geom_raster() +
-    xlab("x") + 
-    ylab("y") + 
-    theme_bw()
-  
-  p1+p2+p3
+  return(p1)
 }
 
 rmse_actvpred_loc <- function(x){
@@ -147,3 +149,22 @@ main_est_loc <- function(cur_sample, true_data, full_params_est){
   )
 }
 
+
+# plots
+
+b5 <-  main_est_loc(xb5$sample_df, true_data, full_params_est)$df
+pi5 <- plot_actvpred_loc(main_est_loc(xb5$sample_df, true_data, full_params_est)$df,b=5)
+pi3 <- plot_actvpred_loc(main_est_loc(xb3$sample_df, true_data, full_params_est)$df,b=3)
+pi1 <- plot_actvpred_loc(main_est_loc(xb1$sample_df, true_data, full_params_est)$df,b=1)
+pi0 <- plot_actvpred_loc(main_est_loc(xb0$sample_df, true_data, full_params_est)$df,b=0)
+pi_est <- ggplot(b5, aes(x=x_coords, y=y_coords, fill = loc_par_est)) +   geom_raster() +
+  xlab("x") +
+  ylab("y") +
+  scale_fill_viridis_c(option="viridis",direction=-1,name="Est. mu") +
+  ggtitle("Full Dataset") +
+  theme_bw()
+
+  
+  (pi5 + pi3)/ (pi1 + pi0)/(plot_spacer() + pi_est)
+  
+  

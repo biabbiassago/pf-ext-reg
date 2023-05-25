@@ -10,12 +10,17 @@ generate_sampling_probs <- function(b,dat){
   ### check
   #pi <- sapply(BETA1*dat$x + eta, function(x) max(0,x))
   eps <- rnorm(n,0,1)
-  pi <- abs(b*dat$mean_value+eps)
-  pi <- pi/sum(pi)
+  if(b != 0){
+    pi <- abs(b*dat$mean_value+eps)
+    pi <- pi/sum(pi)  
+  }
+  else if(b==0){
+    pi <- rep(1/n,n)
+  }
   return(list("pi"=pi,"b"=b))
 }
 sample_by_stations <- function(dat,prob){
-  ### Taking the Sample ####
+  ### Taking the Sample on the Ys####
   s_i <- sample(
       1:N,
       size=SAMPLE_SIZE,
@@ -47,25 +52,20 @@ make_samp_plot <- function(cur_samp){
   
   df_plot <- mean_by_station  %>% mutate(
     sampled_measurements = case_when(
-      station %in% sampled_stations ~ mean_value,
-      TRUE ~ NA,
+      station %in% sampled_stations ~ 1,
+      TRUE ~ 0,
     )
   )
   
-  p1 <- ggplot(df_plot, aes(x = x_coords, y = y_coords, fill = sampled_measurements)) + 
+  p1 <- ggplot(df_plot, aes(x = x_coords, y = y_coords, fill = factor(sampled_measurements))) + 
     geom_raster() +
     xlab("x") + 
     ylab("y") + 
-    scale_fill_viridis_c(option="viridis",direction=-1) +
-    theme_bw()
-  
-  p2 <- ggplot(mean_by_station, aes(x=x_coords, y=y_coords, fill = mean_value)) +   geom_raster() +
-    xlab("x") + 
-    ylab("y") + 
-    scale_fill_viridis_c(option="viridis",direction=-1) +
-    theme_bw()
-  
-  p1 + p2 + plot_annotation(title=sprintf("Sample with b=%i and full data",cur_samp$b))
+    theme_bw() +
+    scale_fill_discrete(guide = "none", type=c("lightgrey","tomato4")) + 
+    ggtitle(paste("B=",cur_samp$b)) 
+    
+  return(p1)
   
 }
 
@@ -74,27 +74,46 @@ make_samp_plot <- function(cur_samp){
 ####### RUN #########
 #if you want to run just for one example use this below ~ generates samples
 
-##### get data (mean by station) ####
-# true_data <- read.csv("data/sim1.csv")
-# mean_by_station <- true_data %>%
-#   group_by(station) %>%
-#   summarize(
-#     mean_value = mean(value),
-#     x_coords = first(x_coords),
-#     y_coords = first(y_coords),
-#     x = first(x)
-#   )
+true_data <- read.csv("data/sim1.csv")
+mean_by_station <- true_data %>%
+   group_by(station) %>%
+   summarize(
+     mean_value = mean(value),
+     x_coords = first(x_coords),
+    y_coords = first(y_coords),
+     x = first(x)
+)
 
-# xb3 <- prefsamp_station(3,mean_by_station, true_data)
-# 
-# sample_df <- xb3$sample_df
-# sampled_stations <- xb3$stations
-# make_samp_plot(xb3)
-# 
-# 
-# xb1 <- prefsamp_station(1,mean_by_station, true_data)
-# make_samp_plot(xb1)
-# 
-# 
-# xb0 <- prefsamp_station(0,mean_by_station, true_data)
-# make_samp_plot(xb0)
+mean_by_station %>% 
+  ggplot(aes(x=mean_value)) + 
+  geom_histogram(bins=15, fill="white",color="black") + 
+  theme_classic() + 
+  ggtitle("Mean (monthly) value by station") +
+  xlab("Average max")
+
+
+xb5 <- prefsamp_station(5,mean_by_station, true_data)
+p1 <- make_samp_plot(xb5)
+
+
+xb3 <- prefsamp_station(3,mean_by_station, true_data)
+p2 <- make_samp_plot(xb3)
+#
+#
+xb1 <- prefsamp_station(1,mean_by_station, true_data)
+p3 <- make_samp_plot(xb1)
+#
+#
+xb0 <- prefsamp_station(0,mean_by_station, true_data)
+p4 <- make_samp_plot(xb0)
+
+
+
+p5 <- ggplot(mean_by_station, aes(x=x_coords, y=y_coords, fill = mean_value)) +   geom_raster() +
+  xlab("x") + 
+  ylab("y") + 
+  scale_fill_viridis_c(option="viridis",direction=-1,name="Mean Y value") +
+  theme_bw()
+
+
+(p1 + p2)/ (p3 + p4)/(plot_spacer() + p5 + plot_spacer())
