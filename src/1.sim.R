@@ -21,7 +21,7 @@ rep_data <- matrix(NA, nrow=N, ncol=MONTHS)
 
 for(j in 1:MONTHS){
   
-  # generate 30 OBS "per day" per station (100 stations)
+  # generate 24*30 OBS "per hour per day" per station (100 stations)
   gau_process <- mvrnorm(
     OBS,
     mu=BETA1*X+eta,
@@ -46,12 +46,16 @@ df <- data.frame(
   mutate(station = rep(1:N,each=MONTHS))
 
 
-# plot examples, by staton for all measurements 
+# plot examples, by station for all measurements 
 # just a few stations
 df %>%
   filter(station %in% 1:12) %>%
   ggplot(aes(x=value)) + 
-  geom_density() + facet_wrap(~station) + theme_bw() + xlab("Y") + ggtitle("Distribution of monthly max by station \nTruth Data") 
+  geom_density() + 
+  facet_wrap(~station) + 
+  theme_bw() + 
+  xlab("Y") + 
+  ggtitle("Distribution of monthly max by station \nTruth Data") 
 
 # quick check for nine month
 par(mfrow=c(3,3))
@@ -66,7 +70,7 @@ for(i in c(1:9)){
 
 write.csv(
   df,
-  file="data/sim1.csv"
+  file="data/sim2.csv"
 )
 
 

@@ -1,24 +1,9 @@
 library(tidyverse)
 library(patchwork)
 source("src/utils.R")
+source("src/sampling_probs.R")
 set.seed(3523)
 
-##### Auxiliary function ####
-generate_sampling_probs <- function(b,dat){
-  n <- length(dat$x)
-
-  ### check
-  #pi <- sapply(BETA1*dat$x + eta, function(x) max(0,x))
-  eps <- rnorm(n,0,1)
-  if(b != 0){
-    pi <- abs(b*dat$mean_value+eps)
-    pi <- pi/sum(pi)  
-  }
-  else if(b==0){
-    pi <- rep(1/n,n)
-  }
-  return(list("pi"=pi,"b"=b))
-}
 sample_by_stations <- function(dat,prob){
   ### Taking the Sample on the Ys####
   s_i <- sample(
@@ -74,7 +59,7 @@ make_samp_plot <- function(cur_samp){
 ####### RUN #########
 #if you want to run just for one example use this below ~ generates samples
 
-true_data <- read.csv("data/sim1.csv")
+true_data <- read.csv("data/sim2.csv")
 mean_by_station <- true_data %>%
    group_by(station) %>%
    summarize(
