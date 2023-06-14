@@ -1,6 +1,6 @@
 library(extRemes)
 
-today<-"05172"
+today <- Sys.Date()
 
 
 source("src/utils.R")
@@ -45,8 +45,11 @@ colnames(rmse_results) <- proposed_b
 
 par(mfrow=c(2,2))
 for(b in proposed_b){
-  hist(rmse_results[,as.character(b)],main=paste("B=",b),xlab="RMSE")
-  abline(v=mean(rmse_results[,4]),col="red")
+  hist(
+    rmse_results[,as.character(b)],
+    main=paste("B=",b),
+    xlab="RMSE"
+  )
 }
 
 meanres <- apply(rmse_results,2,mean,na.rm=TRUE)
@@ -55,9 +58,20 @@ minres <- apply(rmse_results,2,min,na.rm=TRUE)
 varres<- apply(rmse_results,2,var,na.rm=TRUE)
 
 resrmse <- data.frame(meanres,maxres,minres,varres)
-kableExtra::kbl(resrmse,col.names=c("Mean","Max","Min","Var"),format="latex",booktabs=TRUE,digits = 3)
+#kableExtra::kbl(resrmse,col.names=c("Mean","Max","Min","Var"),format="latex",booktabs=TRUE,digits = 3)
 
+#kableExtra::kbl(resrmse,col.names=c("Mean","Max","Min","Var"),format="html",booktabs=TRUE,digits = 3)
 
+resrmse %>%
+  kableExtra::kbl(
+    col.names=c("Mean","Max","Min","Var"),
+    booktabs=TRUE, 
+    digits = 3,
+    caption= "Mean, Max, Min and Var of the RMSE by value of b, the parameter that controls preferential sampling",
+    label="rmse",
+    format="latex") %>% 
+  kableExtra::kable_classic(full_width = F, html_font = "Cambria")
 
 
 saveRDS(rmse_results, paste0("outputs/rmse_loc",today,".rds"))
+

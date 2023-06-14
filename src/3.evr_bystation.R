@@ -1,5 +1,6 @@
 
 library(geoR)
+library(extRemes)
 library(patchwork)
 library(sp)
 library(gstat)
@@ -132,8 +133,8 @@ plot_actvpred_loc <- function(actvpred_df,b){
 rmse_actvpred_loc <- function(x){
   #"takes a df in format actvpred and returns for location RMSE
   sqrt(
-    sum(
-  (x$loc_par_est-x$loc_par_pred)^2)/N
+    mean(
+  (x$loc_par_est-x$loc_par_pred)^2)
   )
 }
 main_est_loc <- function(cur_sample, true_data, full_params_est){
@@ -151,7 +152,7 @@ main_est_loc <- function(cur_sample, true_data, full_params_est){
 
 
 # plots
-
+full_parms_est <- estimate_parms(true_data)
 b5 <-  main_est_loc(xb5$sample_df, true_data, full_params_est)$df
 pi5 <- plot_actvpred_loc(main_est_loc(xb5$sample_df, true_data, full_params_est)$df,b=5)
 pi3 <- plot_actvpred_loc(main_est_loc(xb3$sample_df, true_data, full_params_est)$df,b=3)
@@ -164,7 +165,7 @@ pi_est <- ggplot(b5, aes(x=x_coords, y=y_coords, fill = loc_par_est)) +   geom_r
   ggtitle("Full Dataset") +
   theme_bw()
 
-  
-  (pi5 + pi3)/ (pi1 + pi0)/(plot_spacer() + pi_est)
+pi_est  
+(pi5 + pi3) / (pi1 + pi0)
   
   

@@ -4,7 +4,7 @@ PHI <- 0.2
 SIGMA2X <- 3
 PHIX <- 0.5
 BETA1 <- 10
-OBS <- 30
+OBS <- 720 #hourly
 MONTHS <- 50
 SAMPLE_SIZE = 30
 
