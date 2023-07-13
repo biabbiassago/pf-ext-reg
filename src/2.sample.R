@@ -1,7 +1,7 @@
 library(tidyverse)
 library(patchwork)
-source("src/utils.R")
-source("src/sampling_probs.R")
+source(here::here("src/utils.R"))
+source(here::here("src/sampling_probs.R"))
 set.seed(3523)
 
 sample_by_stations <- function(dat,prob){
@@ -34,7 +34,6 @@ prefsamp_station <- function(b,dat_mean, dat_full){
 make_samp_plot <- function(cur_samp){
   
   sampled_stations <- cur_samp$stations
-  
   df_plot <- mean_by_station  %>% mutate(
     sampled_measurements = case_when(
       station %in% sampled_stations ~ 1,
@@ -56,23 +55,23 @@ make_samp_plot <- function(cur_samp){
 
 
 
-####### RUN #########
+###### RUN #########
 #if you want to run just for one example use this below ~ generates samples
 
-true_data <- read.csv("data/sim2.csv")
+true_data <- read.csv(here::here("data/sim-gev-2.csv"))
 mean_by_station <- true_data %>%
    group_by(station) %>%
    summarize(
-     mean_value = mean(value),
-     x_coords = first(x_coords),
+    mean_value = mean(value),
+    x_coords = first(x_coords),
     y_coords = first(y_coords),
-     x = first(x)
+    x = mean(x)
 )
 
-mean_by_station %>% 
-  ggplot(aes(x=mean_value)) + 
-  geom_histogram(bins=15, fill="white",color="black") + 
-  theme_classic() + 
+mean_by_station %>%
+  ggplot(aes(x=mean_value)) +
+  geom_histogram(bins=15, fill="white",color="black") +
+  theme_classic() +
   ggtitle("Mean (monthly) value by station") +
   xlab("Average max")
 
@@ -95,10 +94,10 @@ p4 <- make_samp_plot(xb0)
 
 
 p5 <- ggplot(mean_by_station, aes(x=x_coords, y=y_coords, fill = mean_value)) +   geom_raster() +
-  xlab("x") + 
-  ylab("y") + 
+  xlab("x") +
+  ylab("y") +
   scale_fill_viridis_c(option="viridis",direction=-1,name="Mean Y value") +
   theme_bw()
 
 
-(p1 + p2)/ (p3 + p4)/(plot_spacer() + p5 + plot_spacer())
+# (p1 + p2)/ (p3 + p4)/(plot_spacer() + p5 + plot_spacer())

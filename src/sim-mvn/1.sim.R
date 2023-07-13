@@ -1,4 +1,4 @@
-" Simulate a Spatial Process for the MAX- with Exponential covariance fnct "
+" Simulate a Spatial Process for the MAX by picking MAX of MVN"
 set.seed(123)
 library(tidyverse)
 library(MASS)
@@ -33,11 +33,11 @@ for(j in 1:MONTHS){
 }
 
 df <- data.frame(
-    x_coords = rep(x_coords, each=n_coords),
-    y_coords= rep(y_coords, n_coords),
-    rep_data,
-    x = X
-  ) %>%
+  x_coords = rep(x_coords, each=n_coords),
+  y_coords= rep(y_coords, n_coords),
+  rep_data,
+  x = X
+) %>%
   pivot_longer(
     cols=-c("x_coords","y_coords","x"),
     names_to = "measurements"

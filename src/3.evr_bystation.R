@@ -19,6 +19,7 @@ fit_evr_by_station <- function(i,dat){
 }
 
 make_pred_df <- function(cur_sample){
+  
   parms_est <- sapply(
     unique(cur_sample$station),
     function(x) fit_evr_by_station(x,cur_sample)
@@ -150,22 +151,22 @@ main_est_loc <- function(cur_sample, true_data, full_params_est){
   )
 }
 
-
-# plots
-full_parms_est <- estimate_parms(true_data)
-b5 <-  main_est_loc(xb5$sample_df, true_data, full_params_est)$df
-pi5 <- plot_actvpred_loc(main_est_loc(xb5$sample_df, true_data, full_params_est)$df,b=5)
-pi3 <- plot_actvpred_loc(main_est_loc(xb3$sample_df, true_data, full_params_est)$df,b=3)
-pi1 <- plot_actvpred_loc(main_est_loc(xb1$sample_df, true_data, full_params_est)$df,b=1)
-pi0 <- plot_actvpred_loc(main_est_loc(xb0$sample_df, true_data, full_params_est)$df,b=0)
-pi_est <- ggplot(b5, aes(x=x_coords, y=y_coords, fill = loc_par_est)) +   geom_raster() +
-  xlab("x") +
-  ylab("y") +
-  scale_fill_viridis_c(option="viridis",direction=-1,name="Est. mu") +
-  ggtitle("Full Dataset") +
-  theme_bw()
-
-pi_est  
-(pi5 + pi3) / (pi1 + pi0)
-  
+# 
+# # plots
+# full_parms_est <- estimate_parms(true_data)
+# b5 <-  main_est_loc(xb5$sample_df, true_data, full_params_est)$df
+# pi5 <- plot_actvpred_loc(main_est_loc(xb5$sample_df, true_data, full_params_est)$df,b=5)
+# pi3 <- plot_actvpred_loc(main_est_loc(xb3$sample_df, true_data, full_params_est)$df,b=3)
+# pi1 <- plot_actvpred_loc(main_est_loc(xb1$sample_df, true_data, full_params_est)$df,b=1)
+# pi0 <- plot_actvpred_loc(main_est_loc(xb0$sample_df, true_data, full_params_est)$df,b=0)
+# pi_est <- ggplot(b5, aes(x=x_coords, y=y_coords, fill = loc_par_est)) +   geom_raster() +
+#   xlab("x") +
+#   ylab("y") +
+#   scale_fill_viridis_c(option="viridis",direction=-1,name="Est. mu") +
+#   ggtitle("Full Dataset") +
+#   theme_bw()
+# 
+# pi_est  
+# (pi5 + pi3) / (pi1 + pi0)
+#   
   

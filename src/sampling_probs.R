@@ -1,16 +1,7 @@
 
 # sampling probabilities
 
-true_data <- read.csv("data/sim2.csv")
-mean_by_station <- true_data %>%
-  group_by(station) %>%
-  summarize(
-    mean_value = mean(value),
-    x_coords = first(x_coords),
-    y_coords = first(y_coords),
-    x = first(x)
-  )
-
+#true_data <- read.csv("data/sim2.csv")
 
 generate_sampling_probs <- function(b,dat, type="power"){
   n <- length(dat$x)
@@ -38,35 +29,41 @@ generate_sampling_probs <- function(b,dat, type="power"){
   return(list("pi"=pi_std,"b"=b))
 }
 
+show_sampling_plots <- function(){
+  par(mfrow=c(1,3))
+  mean_by_station <- true_data %>%
+    group_by(station) %>%
+    summarize(
+      mean_value = mean(value),
+      x_coords = first(x_coords),
+      y_coords = first(y_coords),
+      x = first(x)
+    )
+  
+  
+  plot(mean_by_station$mean_value,generate_sampling_probs(b=1,mean_by_station, type="quadratic")$pi,xlab="Mean Value by station",ylab="Probability",col="darkgreen")
+  points(mean_by_station$mean_value, generate_sampling_probs(b=3,mean_by_station, type="quadratic")$pi,col="red")
+  points(mean_by_station$mean_value,generate_sampling_probs(b=5,mean_by_station, type="quadratic")$pi,col="blue")
+  points(mean_by_station$mean_value,generate_sampling_probs(b=0,mean_by_station, type="quadratic")$pi,col="darkgray")
+  legend("topleft",legend=c(1,3,5,0),col=c("darkgreen","red","blue","darkgray"),pch=1)
 
 
-plot(mean_by_station$mean_value,generate_sampling_probs(b=5,mean_by_station, type="quadratic")$pi,xlab="Mean Value by station",ylab="Probability",col="darkgreen")
-points(mean_by_station$mean_value, generate_sampling_probs(b=3,mean_by_station, type="quadratic")$pi,col="red")
-points(mean_by_station$mean_value,generate_sampling_probs(b=1,mean_by_station, type="quadratic")$pi,col="blue")
-points(mean_by_station$mean_value,generate_sampling_probs(b=0,mean_by_station, type="quadratic")$pi,col="darkgray")
-ylim = c(0,0.5)
-legend("topleft",legend=c(5,3,1,0),col=c("darkgreen","red","blue","darkgray"),pch=1)
+  
+  plot(mean_by_station$mean_value,generate_sampling_probs(b=1,mean_by_station, type="linear")$pi,xlab="Mean Value by station",ylab="Probability",col="darkgreen")
+  points(mean_by_station$mean_value, generate_sampling_probs(b=3,mean_by_station, type="linear")$pi,col="red")
+  points(mean_by_station$mean_value,generate_sampling_probs(b=5,mean_by_station, type="linear")$pi,col="blue")
+  points(mean_by_station$mean_value,generate_sampling_probs(b=0,mean_by_station, type="linear")$pi,col="darkgray")
+  legend("topleft",legend=c(1,3,5,0),col=c("darkgreen","red","blue","darkgray"),pch=1)
 
+  
+  plot(mean_by_station$mean_value,generate_sampling_probs(b=1,mean_by_station, type="power")$pi,xlab="Mean Value by station",ylab="Probability",col="darkgreen")
+  points(mean_by_station$mean_value, generate_sampling_probs(b=3,mean_by_station, type="power")$pi,col="red")
+  points(mean_by_station$mean_value,generate_sampling_probs(b=5,mean_by_station, type="power")$pi,col="blue")
+  points(mean_by_station$mean_value,generate_sampling_probs(b=0,mean_by_station, type="power")$pi,col="darkgray")
+  ylim = c(0,0.5)
+  legend("topleft",legend=c(1,3,5,0),col=c("darkgreen","red","blue","darkgray"),pch=1)
 
-
-plot(mean_by_station$mean_value,generate_sampling_probs(b=5,mean_by_station, type="linear")$pi,xlab="Mean Value by station",ylab="Probability",col="darkgreen")
-points(mean_by_station$mean_value, generate_sampling_probs(b=3,mean_by_station, type="linear")$pi,col="red")
-points(mean_by_station$mean_value,generate_sampling_probs(b=1,mean_by_station, type="linear")$pi,col="blue")
-points(mean_by_station$mean_value,generate_sampling_probs(b=0,mean_by_station, type="linear")$pi,col="darkgray")
-ylim = c(0,0.5)
-legend("topleft",legend=c(5,3,1,0),col=c("darkgreen","red","blue","darkgray"),pch=1)
-
-
-
-
-
-plot(mean_by_station$mean_value,generate_sampling_probs(b=5,mean_by_station, type="power")$pi,xlab="Mean Value by station",ylab="Probability",col="darkgreen")
-points(mean_by_station$mean_value, generate_sampling_probs(b=3,mean_by_station, type="power")$pi,col="red")
-points(mean_by_station$mean_value,generate_sampling_probs(b=1,mean_by_station, type="power")$pi,col="blue")
-points(mean_by_station$mean_value,generate_sampling_probs(b=0,mean_by_station, type="power")$pi,col="darkgray")
-ylim = c(0,0.5)
-legend("topleft",legend=c(5,3,1,0),col=c("darkgreen","red","blue","darkgray"),pch=1)
-
-
+}
+#show_sampling_plots()
 
 

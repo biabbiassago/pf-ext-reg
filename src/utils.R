@@ -3,10 +3,10 @@ SIGMA2 <- 1
 PHI <- 0.2
 SIGMA2X <- 3
 PHIX <- 0.5
-BETA1 <- 10
-OBS <- 720 #hourly
+BETA1 <- 2
+OBS <- 720 #
 MONTHS <- 50
-SAMPLE_SIZE = 30
+SAMPLE_SIZE <- 100
 
 
 # define exponential covariance function
@@ -17,8 +17,8 @@ exp_cov <- function(sigma2,phi, distp){
 }
 
 # generate locations on 10X10 grid
-x_coords <- seq(0.1,1,by=0.1)
-y_coords <- seq(0.1,1,by=0.1)
+x_coords <- seq(0.1,1.5,by=0.1)
+y_coords <- seq(0.1,1.5,by=0.1)
 n_coords <- length(x_coords)
 
 true_coords <- expand.grid(x_coords,y_coords)

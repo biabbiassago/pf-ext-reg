@@ -1,11 +1,12 @@
 library(extRemes)
 
+SIM_TYPE <- "sim3"
+
 today <- Sys.Date()
 
-
-source("src/utils.R")
-source("src/2.sample.R")
-source("src/3.evr_bystation.R")
+source(here::here("src/utils.R"))
+source(here::here("src/2.sample.R"))
+source(here::here("src/3.evr_bystation.R"))
 
 nsims <- 100
 proposed_b <- c(5,3,1,0)
@@ -20,14 +21,15 @@ loc_rmse_fullsim <- function(b, mean_by_station, true_data){
 
 ### ------------------- ####
 #### RUN SIM #####
-true_data <- read.csv("data/sim1.csv")
+true_data <- read.csv(paste0("data/",SIM_TYPE,".csv"))
+
 mean_by_station <- true_data %>%
   group_by(station) %>%
   summarize(
     mean_value = mean(value),
     x_coords = first(x_coords),
     y_coords = first(y_coords),
-    x = first(x)
+    x = mean(x)
 )
 
 
@@ -58,8 +60,8 @@ minres <- apply(rmse_results,2,min,na.rm=TRUE)
 varres<- apply(rmse_results,2,var,na.rm=TRUE)
 
 resrmse <- data.frame(meanres,maxres,minres,varres)
-#kableExtra::kbl(resrmse,col.names=c("Mean","Max","Min","Var"),format="latex",booktabs=TRUE,digits = 3)
 
+#kableExtra::kbl(resrmse,col.names=c("Mean","Max","Min","Var"),format="latex",booktabs=TRUE,digits = 3)
 #kableExtra::kbl(resrmse,col.names=c("Mean","Max","Min","Var"),format="html",booktabs=TRUE,digits = 3)
 
 resrmse %>%
@@ -73,5 +75,6 @@ resrmse %>%
   kableExtra::kable_classic(full_width = F, html_font = "Cambria")
 
 
-saveRDS(rmse_results, paste0("outputs/rmse_loc",today,".rds"))
+saveRDS(rmse_results, paste0("outputs/rmse_loc-",today,"-",SIM_TYPE,".rds"))
 
+#rmse_results <- readRDS("outputs/rmse_loc2023-06-14.rds")
