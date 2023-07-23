@@ -43,17 +43,17 @@ df <- data.frame(
     y_coords= rep(rep(y_coords, each = MONTHS),length(y_coords)),
   )
 
-df %>%
-  filter(station %in% 13:20) %>%
-  ggplot(aes(x=value)) +
-  geom_density() +
-  facet_wrap(~station) +
-  theme_bw() +
-  xlab("y") +
-  ggtitle("distribution of 60 monthly max by station \ntruth data from Gumbel Distribution")
-# 
+# df %>%
+#   filter(station %in% 13:20) %>%
+#   ggplot(aes(x=value)) +
+#   geom_density() +
+#   facet_wrap(~station) +
+#   theme_bw() +
+#   xlab("y") +
+#   ggtitle("distribution of 60 monthly max by station \ntruth data from Gumbel Distribution")
+# # 
 
-write.csv(
-  df,
-  file=here::here("data/sim-gev-2.csv")
+write_rds(
+  list("true_data" = df, "true_mus" = mu),
+  file=here::here(paste0("data/sim-gev-3-PHIX",PHIX,".rds"))
 )

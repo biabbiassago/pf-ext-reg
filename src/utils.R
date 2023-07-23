@@ -1,12 +1,10 @@
 
-SIGMA2 <- 1
-PHI <- 0.2
-SIGMA2X <- 3
-PHIX <- 0.5
-BETA1 <- 2
+SIGMA2 <- 0.1
+PHI <- 0.8
+SIGMA2X <- 0.2
+BETA1 <- 0.5
 OBS <- 720 #
 MONTHS <- 50
-SAMPLE_SIZE <- 100
 
 
 # define exponential covariance function
@@ -16,9 +14,9 @@ exp_cov <- function(sigma2,phi, distp){
   )
 }
 
-# generate locations on 10X10 grid
-x_coords <- seq(0.1,1.5,by=0.1)
-y_coords <- seq(0.1,1.5,by=0.1)
+# generate locations on 20X20 grid
+x_coords <- seq(0.05,1.0,by=0.05)
+y_coords <- seq(0.05,1.0,by=0.05)
 n_coords <- length(x_coords)
 
 true_coords <- expand.grid(x_coords,y_coords)
@@ -43,3 +41,4 @@ for(i in 1:N){
     Sigma_eta[i,j] <- exp_cov(SIGMA2,PHI,distance_mat[i,j])
   }
 }
+

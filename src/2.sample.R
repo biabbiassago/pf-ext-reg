@@ -57,47 +57,47 @@ make_samp_plot <- function(cur_samp){
 
 ###### RUN #########
 #if you want to run just for one example use this below ~ generates samples
-
-true_data <- read.csv(here::here("data/sim-gev-2.csv"))
-mean_by_station <- true_data %>%
-   group_by(station) %>%
-   summarize(
-    mean_value = mean(value),
-    x_coords = first(x_coords),
-    y_coords = first(y_coords),
-    x = mean(x)
-)
-
-mean_by_station %>%
-  ggplot(aes(x=mean_value)) +
-  geom_histogram(bins=15, fill="white",color="black") +
-  theme_classic() +
-  ggtitle("Mean (monthly) value by station") +
-  xlab("Average max")
-
-
-xb5 <- prefsamp_station(5,mean_by_station, true_data)
-p1 <- make_samp_plot(xb5)
-
-
-xb3 <- prefsamp_station(3,mean_by_station, true_data)
-p2 <- make_samp_plot(xb3)
-#
-#
-xb1 <- prefsamp_station(1,mean_by_station, true_data)
-p3 <- make_samp_plot(xb1)
-#
-#
-xb0 <- prefsamp_station(0,mean_by_station, true_data)
-p4 <- make_samp_plot(xb0)
-
-
-
-p5 <- ggplot(mean_by_station, aes(x=x_coords, y=y_coords, fill = mean_value)) +   geom_raster() +
-  xlab("x") +
-  ylab("y") +
-  scale_fill_viridis_c(option="viridis",direction=-1,name="Mean Y value") +
-  theme_bw()
-
+# 
+# true_data <- read.csv(here::here("data/sim-gev-2.csv"))
+# mean_by_station <- true_data %>%
+#    group_by(station) %>%
+#    summarize(
+#     mean_value = mean(value),
+#     x_coords = first(x_coords),
+#     y_coords = first(y_coords),
+#     x = mean(x)
+# )
+# 
+# mean_by_station %>%
+#   ggplot(aes(x=mean_value)) +
+#   geom_histogram(bins=15, fill="white",color="black") +
+#   theme_classic() +
+#   ggtitle("Mean (monthly) value by station") +
+#   xlab("Average max")
+# 
+# 
+# xb5 <- prefsamp_station(5,mean_by_station, true_data)
+# p1 <- make_samp_plot(xb5)
+# 
+# 
+# xb3 <- prefsamp_station(3,mean_by_station, true_data)
+# p2 <- make_samp_plot(xb3)
+# #
+# #
+# xb1 <- prefsamp_station(1,mean_by_station, true_data)
+# p3 <- make_samp_plot(xb1)
+# #
+# #
+# xb0 <- prefsamp_station(0,mean_by_station, true_data)
+# p4 <- make_samp_plot(xb0)
+# 
+# 
+# 
+# p5 <- ggplot(mean_by_station, aes(x=x_coords, y=y_coords, fill = mean_value)) +   geom_raster() +
+#   xlab("x") +
+#   ylab("y") +
+#   scale_fill_viridis_c(option="viridis",direction=-1,name="Mean Y value") +
+#   theme_bw()
+# 
 
 # (p1 + p2)/ (p3 + p4)/(plot_spacer() + p5 + plot_spacer())
