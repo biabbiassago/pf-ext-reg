@@ -1,0 +1,158 @@
+---
+title: "Simulation Results"
+author: "Bianca Brusco"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,cache=TRUE)
+source(here::here("src/print_sim20230725_results.R"))
+```
+
+
+Differences from last time:
+
+- Estimate the covariance parameters used in kriging via `likfit` instead of using the `geoR:variofit` function. The initial values for likfit are $\sigma_{\eta}$ and $\phi_{\eta}$ (the real ones).  
+- Made $\beta1$ smaller: 1.2. 
+- Reduced SIGMA2X from 3 to 0.2. 
+- FEVD: change estimation method from Maximum Likelihood to Generalize Maximum Likelihood. 
+- currently just looking at B=3,1,0. 
+
+(MLE seemed to sometimes non find the correct max -- see end of this document for example). 
+
+
+**True values**:
+
+Stations Population Size = 400 stations
+
+```
+SIGMA2 = 0.1. 
+PHI =  0.6. 
+SIGMA2X = 0.2. 
+BETA1 = 1.2. 
+```
+
+Currently showing results for 50 simulations for PHIX = 0.2, 0.5, 1. 
+Sample sizes are 120 and 280
+
+## Results for PHI-X = 0.2
+
+
+```{r}
+PHIX <- 0.2
+```
+
+### Sample Size: 120
+
+```{r,echo=FALSE}
+SAMPLE_SIZE <- 120
+print_results()
+
+```
+
+
+### Sample Size: 280
+
+```{r,echo=FALSE}
+SAMPLE_SIZE <- 280
+print_results()
+```
+
+
+\newpage
+
+## Results for PHI-X = 0.5
+
+```{r}
+PHIX <- 0.5
+```
+
+### Sample Size: 120
+
+```{r,echo=FALSE}
+SAMPLE_SIZE <- 120
+print_results()
+```
+
+
+### Sample Size: 280
+
+```{r,echo=FALSE}
+SAMPLE_SIZE <- 280
+print_results()
+```
+
+\newpage
+
+## Results forFOR PHI-X = 1
+
+```{r}
+PHIX <- 1
+```
+
+### Sample Size: 120
+
+```{r,echo=FALSE}
+SAMPLE_SIZE <- 120
+print_results()
+```
+
+
+### Sample Size: 280
+
+```{r,echo=FALSE}
+SAMPLE_SIZE <- 280
+print_results()
+```
+
+
+
+# Example of MLE method failing:
+
+IF using fevd: location estimated to -1201
+
+
+```{r}
+# 
+# bad_stat <- 304
+# 
+# stat_dat <- true_data %>% filter(station==bad_stat)
+# fit <- fevd(stat_dat$value, method="MLE")
+
+############################################
+# fevd(x = stat_dat$value, method = "MLE")
+# 
+# [1] "Estimation Method used: MLE"
+# 
+# 
+# Negative Log-Likelihood Value:  807.7038 
+# 
+# 
+# Estimated parameters:
+#   location     scale     shape 
+# -1201.703  3662.540  3167.249 
+# 
+# AIC = 1621.408 
+# 
+# BIC = 1627.144 
+
+
+
+#fit2 <- fevd(stat_dat$value, method="GMLE")
+# fevd(x = stat_dat$value, method = "GMLE")
+# 
+# [1] "Estimation Method used: GMLE"
+# 
+# 
+# Negative Log-Likelihood Value:  136.8874 
+# 
+# 
+# Estimated parameters:
+#   location      scale      shape 
+# -1.2047879  0.7069493  0.4994669 
+# 
+# AIC = 279.7749 
+# 
+# BIC = 285.5109 
+```

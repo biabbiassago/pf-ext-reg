@@ -27,6 +27,7 @@ PHIX <- 0.2
 ```{r,echo=FALSE}
 SAMPLE_SIZE <- 120
 print_results()
+
 ```
 
 ### Sample Size: 200

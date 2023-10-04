@@ -3,32 +3,33 @@ source(here::here("src/utils.R"))
 source(here::here("src/2.sample.R"))
 source(here::here("src/3.evr_bystation.R"))
 
-print(paste("Phi is",PHIX,"sample size is",SAMPLE_SIZE))
+#print(paste("Phi_X is",PHIX,"sample size is",SAMPLE_SIZE))
 
-nsims <- 100
+nsims <- 50
 today <- Sys.Date()
-proposed_b <- c(5,3,1,0)
-SIM_TYPE <- "sim3-gev"
-true_data <- read.csv(paste0("data/sim-gev-3-PHIX",PHIX,".csv"))
-  
-mean_by_station <- true_data %>%
-  group_by(station) %>%
-  summarize(
-    mean_value = mean(value),
-    x_coords = first(x_coords),
-    y_coords = first(y_coords),
-    x = first(x)
-)
+proposed_b <- c(3,1,0)
+SIM_TYPE <- "sim-gev-4"
+
+#uncomment to run
+# sims <- read_rds(paste0("data/sim-gev-4-PHIX",PHIX,".rds"))
+# true_data <- sims$true_data
+# true_mus <- sims$true_mus
+#   
+# mean_by_station <- true_data %>%
+#   group_by(station) %>%
+#   summarize(
+#     mean_value = mean(value),
+#     x_coords = first(x_coords),
+#     y_coords = first(y_coords),
+#     x = first(x)
+# )
 
 fit_evr_by_station_trend <- function(i,dat){
   
   stat_dat <- dat %>% filter(station==i)
-  fit<- fevd(stat_dat$value)
+  fit <- fevd(stat_dat$value, method="GMLE")
   return(fit$results$par)
 }
-
-
-#TRUE_MUS <-mu
 
 
 make_pred_trend_df <- function(cur_sample){
@@ -59,24 +60,41 @@ predict_location <- function(pred_df,krig=TRUE){
   
   # parametric variogram. Intial values are computed as to mimic the process of
   # "looking" at a semivariogram
-  suppressWarnings({
-    loc_vg <- geoR::variog(data=pred_df$loc_par,coords=pred_df@coords, messages=FALSE)
-    loc_fit <- geoR::variofit(loc_vg, cov.model = "exp", fix.nugget = T,messages=FALSE)
+
+    # 
+    # loc_vg <- geoR::variog(data=pred_df$loc_par,coords=pred_df@coords, messages=FALSE)
+    # loc_fit <- geoR::variofit(loc_vg, cov.model = "exp", fix.nugget = T,messages=FALSE)
+    
+    
     if(krig==TRUE){
+      
+      suppressWarnings({
+
+        value_mean_model <- likfit(
+          coords = coordinates(pred_df),
+          data=pred_df$mean_value,
+          cov.model="exponential",
+          ini=c(SIGMA2,PHI),
+          fix.nugget = TRUE,
+          message=FALSE
+        )
+      })
+  
       loc_predicted <- krige.conv(
         data = pred_df$loc_par,
         coords=pred_df@coords,
         locations = true_coords,
-        krige = krige.control(type.krige = "OK",obj.model = loc_fit),
+        krige = krige.control(type.krige = "OK",obj.model = value_mean_model),
       )
+      cov_pars <- value_mean_model$cov.pars
+      names(cov_pars) <- c("sigma2mu","phimu")
     }
-    else{
+    else if (krig==FALSE){
       loc_predicted <- NULL
+      cov_pars <- NULL
+      
     }
 
-  })
-  cov_pars <- loc_fit$cov.pars
-  names(cov_pars) <- c("sigma2mu","phimu")
   # true value for the actually sampled stations
   return(list("predicted" = loc_predicted$predict, "cov_pars" = cov_pars))
 }
@@ -86,7 +104,6 @@ get_regression_estimates <- function(b, mean_by_station, true_data){
   
   # take a sample and get sampled stations
   xb <- prefsamp_station(b=b, mean_by_station, true_data)
-  sampled_stations <- sort(xb$stations)
   pred_df <- make_pred_trend_df(cur_sample = xb) # create df 
   
   # do kriging, using predict_location function
@@ -94,7 +111,7 @@ get_regression_estimates <- function(b, mean_by_station, true_data){
   if(SAMPLE_SIZE != N){
     variog_res <- predict_location(pred_df)
     y <- variog_res$predicted
-    y[sampled_stations] <- pred_df$loc_par
+    y[xb$stations] <- pred_df$loc_par
   }
   else{
     variog_res <- predict_location(pred_df,krig=FALSE)
@@ -106,7 +123,7 @@ get_regression_estimates <- function(b, mean_by_station, true_data){
   geo_df <- as.geodata(
     data.frame(
       y=y,
-      x=X,
+      x=mean_by_station$x,
       x_coords=mean_by_station$x_coords,
       y_coords=mean_by_station$y_coords),
     data.col=c(1,2),
@@ -119,7 +136,7 @@ get_regression_estimates <- function(b, mean_by_station, true_data){
     data=geo_df$data[,1],
     cov.model="exponential",
     trend = ~ geo_df$data[,2],
-    ini=c(SIGMA2X,PHIX),
+    ini=c(SIGMA2,PHI),
     fix.nugget = TRUE,
     message=FALSE
   )
@@ -140,56 +157,64 @@ get_regression_estimates <- function(b, mean_by_station, true_data){
   )
 }
 
-
-reg_results_beta0 <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
-reg_results_beta1 <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
-reg_results_sigma <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
-reg_results_phi <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
-reg_results_variogsigma2 <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
-reg_results_variogphi <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
-
-for(b in proposed_b){
-  for(i in 1:nsims){
-    print(paste0("For b=",b," iteration : ",i,"/",nsims))
-    tmp_res <- get_regression_estimates(b,mean_by_station,true_data)
-    reg_results_beta0[i,which(proposed_b == b)] <- tmp_res$beta0_est
-    reg_results_beta1[i,which(proposed_b == b)] <- tmp_res$beta1_est
-    reg_results_sigma[i,which(proposed_b == b)] <- tmp_res$sigma_est
-    reg_results_phi[i,which(proposed_b == b)] <- tmp_res$phi_est
-    reg_results_variogsigma2[i,which(proposed_b == b)] <- tmp_res$variog_cov_pars["sigma2mu"]
-    reg_results_variogphi[i,which(proposed_b == b)] <- tmp_res$variog_cov_pars["phimu"]
+main_sim <- function(){
+  
+  reg_results_beta0 <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
+  reg_results_beta1 <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
+  reg_results_sigma <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
+  reg_results_phi <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
+  reg_results_variogsigma2 <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
+  reg_results_variogphi <- matrix(NA,nrow=nsims,ncol=length(proposed_b))
+  
+  for(b in proposed_b){
+    for(i in 1:nsims){
+      print(paste0("For b=",b," iteration : ",i,"/",nsims))
+      tmp_res <- get_regression_estimates(b,mean_by_station,true_data)
+      reg_results_beta0[i,which(proposed_b == b)] <- tmp_res$beta0_est
+      reg_results_beta1[i,which(proposed_b == b)] <- tmp_res$beta1_est
+      reg_results_sigma[i,which(proposed_b == b)] <- tmp_res$sigma_est
+      reg_results_phi[i,which(proposed_b == b)] <- tmp_res$phi_est
+      reg_results_variogsigma2[i,which(proposed_b == b)] <- tmp_res$variog_cov_pars["sigma2mu"]
+      reg_results_variogphi[i,which(proposed_b == b)] <- tmp_res$variog_cov_pars["phimu"]
+    }
   }
-}
-
-reg_results_byB <- lapply(list(
-  "beta0"=reg_results_beta0,
-  "beta1"=reg_results_beta1,
-  "sigma"=reg_results_sigma,
-  "phi"=reg_results_phi,
-  "variogsigma"=reg_results_variogsigma2,
-  "variogphi"=reg_results_variogphi
+  
+  reg_results_byB <- lapply(list(
+    "beta0"=reg_results_beta0,
+    "beta1"=reg_results_beta1,
+    "sigma"=reg_results_sigma,
+    "phi"=reg_results_phi,
+    "variogsigma"=reg_results_variogsigma2,
+    "variogphi"=reg_results_variogphi
   ),
   FUN= function(x){colnames(x)<-proposed_b;x}
-)
-
-
-# #FULL SET
-# SAMPLE_SIZE <- N
-# no_sampling_results <- get_regression_estimates(b,mean_by_station,true_data)
-
-
-saveRDS(
-  reg_results_byB,
-  paste0(
-    "outputs/reg-est-loc-",
-    today,"-",
-    SIM_TYPE,
-    "sampsize",
-    SAMPLE_SIZE,
-    "phi",
-    PHIX,
-    ".rds")
-)
+  )
+  
+  
+  # #FULL SET
+  # 
+  # SAMPLE_SIZE <- N
+  # no_sampling_results <- get_regression_estimates(b,mean_by_station,true_data)
+  # saveRDS(no_sampling_results,paste0("outputs/25no_sampling_results-PHIX",PHIX,".rds"))
+  
+  
+  saveRDS(
+    reg_results_byB,
+    paste0(
+      "outputs/reg-est-loc-",
+      today,"-",
+      SIM_TYPE,
+      "sampsize",
+      SAMPLE_SIZE,
+      "phi",
+      PHIX,
+      ".rds")
+  )
+  
+  
+  
+  
+}
 
 # avg_over_sims <- lapply(reg_results_byB, function(x){apply(x,2,mean,na.rm=TRUE)})
 # var_over_sims <- lapply(reg_results_byB, function(x){apply(x,2,var,na.rm=TRUE)})
@@ -206,6 +231,10 @@ saveRDS(
 # 
 # 
 # 
+
+
+
+
 
 
 

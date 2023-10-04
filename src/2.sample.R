@@ -17,7 +17,7 @@ sample_by_stations <- function(dat,prob){
   #r_s <- ifelse(1:N %in% s_i, 1, 0)
   
   sample_df <- dat %>% filter(station %in% s_i)
-  return(list("sample_df"=sample_df,"stations"=s_i,"b"=prob$b))
+  return(list("sample_df"=sample_df,"stations"=sort(s_i),"b"=prob$b))
 }
 ##### Main Function ####
 

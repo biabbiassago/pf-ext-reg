@@ -1,5 +1,5 @@
-phis <- c(0.2,0.5,1)
-sample_sizes <- c(120,200,280)
+phis <- c(1.0)
+sample_sizes <- c(120,280)
 
 for(cur_phi in phis){
   PHIX <- cur_phi
