@@ -5,3 +5,6 @@
 .rdb
 .Ruserdata
 .rds
+*.rds
+*.rdb
+*.RData
