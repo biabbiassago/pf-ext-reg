@@ -1,13 +1,13 @@
 library(MASS)
 
-z <- # matrix with value per station 
-x <- # vector of covariates
-loc <- # locations
-s <- # number of stations
+z <- df$value
+x <- df$x
+loc <- true_coords
+s <- 100
 i <- rep(1,50) # 
 
   
-## This specifies the number of MCMC iteration
+## This specifies the number of MCMC iteratiion
 N.iter <- 1000
 
 
@@ -20,6 +20,8 @@ exp_cov <- function(sigma2,phi, distp){
 
 
 max_model <- function(z,x,loc,s,i){
+  
+  # distance matrix from the coordinates
   distance_mat <- fields::rdist(loc)
   
   for(i in 1:N.iter){
@@ -50,18 +52,19 @@ max_model <- function(z,x,loc,s,i){
       xi <- init.xi
       sigma <- init.sigma
     }
+    
     if(i > 1){
       
       mui <- sample.mui(mui,sigma,xi, z, M, SIGMA, s)
-      sigma <- sample.sigma(..)
-      xi <- sample.xi(..)
+      sigma <- sample.sigma()
+      xi <- sample.xi()
       
       
-      alpha0 <- sample.alpha0(alpha0, alpha1)
-      alpha1 <- sample.alpha1(alpha1, alpha0)
+      alpha0 <- sample.alpha0()
+      alpha1 <- sample.alpha1()
       
-      beta0 <- sample.beta0(..)
-      beta1 <- sample.beta1(..)
+      beta0 <- sample.beta0()
+      beta1 <- sample.beta1()
       
       
     }
@@ -77,7 +80,6 @@ max_model <- function(z,x,loc,s,i){
     "beta1"=beta1,
     "xi"=xi
   ))
-  
 }
 
 
