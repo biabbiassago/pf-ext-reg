@@ -22,32 +22,51 @@ sample.mu <- function(
   #fisher_info_inv <- solve(-mle_mod$results$hessian)
   
   SIGMA <- exp_cov(beta0, 1/beta1, distance_mat)
-  
   M <- alpha0 + alpha1*unique(x) 
+
+  
+  ##### CHANGE THIS TO BE ON THE LOG SCALE
+  ##### THIS CAN BE THE LOGLIK OF GEV PDF AND THEN THE SUM OF THE NORMAL PART (LOGGED it)
+  # SEE https://cran.r-project.org/web/packages/metropolis/vignettes/metropolis-vignette.html
+  # target <- function(mu_value){
+  #   return(prod(
+  #     prod(
+  #           (1/sigma)*
+  #           abs(gev_inside(z,mu_value,sigma,xi))^(xi+1)*
+  #           exp(-gev_inside(z,mu_value,sigma,xi))
+  #       )
+  #     )*exp(-1/2*t(mu_value-M)%*%solve(SIGMA)%*%(mu_value-M))
+  #   )
+  # }
+  # 
+  # error 
+  
   # x is a covariate vector with an observation per each location.
   
   gev_inside <- function(z,mu_value,sigma,xi){
     return(
       (1+xi*(z-rep(mu_value,each=MONTHS)/sigma))^(-1/xi)
     )
-  }
+  }i
   
   
-  ##### CHANGE THIS TO BE ON THE LOG SCALE
-  ##### THIS CAN BE THE LOGLIK OF GEV PDF AND THEN THE SUM OF THE NORMAL PART (LOGGED it)
-  # SEE https://cran.r-project.org/web/packages/metropolis/vignettes/metropolis-vignette.html
+  z_mat <- matrix(z,nrow=N)
+  
+  
   target <- function(mu_value){
-    return(prod(
-      prod(
-            (1/sigma)*
-            abs(gev_inside(z,mu_value,sigma,xi))^(xi+1)*
-            exp(-gev_inside(z,mu_value,sigma,xi))
-        )
-      )*exp(-1/2*t(mu_value-M)%*%solve(SIGMA)%*%(mu_value-M))
+    return(
+      (sigma/xi)*sum(
+        sum(
+          
+          log(
+            1 + xi*(y-mui)/sigma
+          )
+        ) *
+          exp(-1/2*t(mu_value-M)%*%solve(SIGMA)%*%(mu_value-M))
+      )
     )
   }
   
-  # error 
   
   proposed <- MASS::mvrnorm(
     1,

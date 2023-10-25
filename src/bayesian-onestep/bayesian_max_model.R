@@ -1,14 +1,14 @@
 library(MASS)
-
+# get data running sim-timeconst.R
 z <- df$value
 x <- df$x
 loc <- true_coords
-s <- 100
-i <- rep(1,50) # 
+s <- s
+#i <- rep(1,MONTHS)  
 
   
 ## This specifies the number of MCMC iteratiion
-N.iter <- 1000
+N.iter <- 10
 
 
 # define exponential covariance function
@@ -19,31 +19,31 @@ exp_cov <- function(sigma2,phi, distp){
 }
 
 
-max_model <- function(z,x,loc,s,i){
+max_model <- function(z,x,loc,s,N.iter){
   
   # distance matrix from the coordinates
   distance_mat <- fields::rdist(loc)
   
-  for(i in 1:N.iter){
+  init.mui <- rep(0.5,s)
+  
+  # alpha are the mean parameters
+  init.alpha0 <- 0
+  init.alpha1 <- 0
+  
+  # beta are the covariance parameters
+  init.beta0 <- 0.1
+  init.beta1 <- 0.1
+  init.sigma <- 0.2
+  init.xi <- 0.5
+  for(iter in 1:N.iter){
     
   
-    pars.samples <- matrix(NA,N.iter,6)
+    pars.samples <- list()
     
-    init.mui <- rep(0.5,s)
-    
-    # alpha are the mean parameters
-    init.alpha0 <- 0
-    init.alpha1 <- 0
-    
-    # beta are the covariance parameters
-    init.beta0 <- 0.1
-    init.beta1 <- 0.1
-    init.sigma <- 0.2
-    init.xi <- 0.5
     
     # initial sigma and initial M
     
-    if(i==1){
+    if(iter==1){
       mui <- init.mui
       alpha0 <- init.alpha0
       alpha1 <- init.alpha1
@@ -53,12 +53,11 @@ max_model <- function(z,x,loc,s,i){
       sigma <- init.sigma
     }
     
-    if(i > 1){
+    if(iter > 1){
       
-      mui <- sample.mui(mui,sigma,xi, z, M, SIGMA, s)
+      mui <- sample.mui(mui,z,sigma,xi,alpha0,alpha1,beta0,beta1,s,distance_mat)
       sigma <- sample.sigma()
       xi <- sample.xi()
-      
       
       alpha0 <- sample.alpha0()
       alpha1 <- sample.alpha1()
@@ -68,8 +67,8 @@ max_model <- function(z,x,loc,s,i){
       
       
     }
-    pars.samples[i,] <- c(mui,alpha0,alpha1,beta0,beta1,xi,sigma)
-    print(i)
+    #pars.samples[iter,] <- list("mui"=mui,"alpha0"=alpha0,"alpha1"=alpha1,"beta0"=beta0,"beta1"=beta1,"xi"=xi,"sigma"=sigma)
+    print(iter)
   }
   return(list(
     "phi"=phi,

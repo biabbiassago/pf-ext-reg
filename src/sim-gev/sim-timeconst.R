@@ -64,9 +64,11 @@ make_true_data <- function(){
   )
 }
 
-#to_save <- make_true_data()
 
+# to_save <- make_true_data()
+# df<- to_save$true_data
+# 
 # write_rds(
 #   to_save,
-#   file=here::here(paste0("data/sim-gev-4-PHIX",PHIX,".rds"))
+#   file=here::here(paste0("data/sim-gev-4-PHIX",PHIX,"24oct.rds"))
 # )
