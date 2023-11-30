@@ -18,11 +18,14 @@ $$
 
 $$
 \vec{\mu} \sim GP(m,\Sigma)
-$$
+$$  
+
 $$
 m | \alpha_0, \alpha_1, x = \alpha_0 + \alpha_1 \times x
-$$
+$$  
+
 And the covariance $\Sigma$ is induced by the exponential covariance function:
+
 $$
 k(s,s') = \beta_0 \times exp(-\beta_1 \lVert s-s' \rVert)
 $$
