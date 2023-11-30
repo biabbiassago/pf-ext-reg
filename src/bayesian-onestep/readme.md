@@ -33,7 +33,7 @@ $$
 
 $\sigma \sim \text{lnNorm}(0,\frac{1}{2})$  
 $\vec{\alpha} \sim MVN_2((0,0),\bar{V})$  
-$\beta_0 \sim \text{InvGamma}(3,1)$
+$\beta_0 \sim \text{InvGamma}(3,1)$  
 $\beta_1 \sim \text{lnNorm}(-\frac{1}{2},\frac{1}{2})$
 
 
