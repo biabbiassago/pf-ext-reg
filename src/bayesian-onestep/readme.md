@@ -4,7 +4,7 @@ File:: `fit_model1.R` contains the file to run the model with a simulated datase
 
 
 
-### One step model:
+### model:
 
 Let $s_i$ , $i = 1,2,..$ be the sampled locations, and $y_{ij}$ be the max at location $i$ over time
 
