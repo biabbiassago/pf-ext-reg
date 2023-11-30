@@ -1,6 +1,6 @@
-File: `sampling-joints.R` contains functions to sample each parameter
-File: `bayesian_max_model.R` contains the function to fit the model in question + a couple of auxiliary functions for plots. 
-File:: `fit_model1.R` contains the file to run the model with a simulated dataset (in data folder) and save the results. 
+File: `sampling-joints.R` contains functions to sample each parameter.  
+File: `bayesian_max_model.R` contains the function to fit the model in question + a couple of auxiliary functions for plots.     
+File:: `fit_model1.R` contains the file to run the model with a simulated dataset (in data folder) and save the results.    
 
 
 
