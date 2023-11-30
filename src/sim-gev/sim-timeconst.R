@@ -1,5 +1,4 @@
 " Simulate a Spatial Process for the max using a GEV "
-set.seed(4649)
 library(tidyverse)
 library(MASS)
 library(fields)
@@ -11,23 +10,24 @@ SCALE <- 1.5
 SHAPE <- 0
 
 make_true_data <- function(){
-  X <- mvrnorm(
+  X <- MASS::mvrnorm(
     1,
     mu = rep(1,N),
     Sigma=Sigma_x
   )
   
-  eta <- mvrnorm(
+  eta <- MASS::mvrnorm(
     1,
     mu = rep(0,N),
     Sigma=Sigma_eta
   )
   
-  mu <- BETA1 * X + eta
+  mu <- ALPHA1 * X + eta
   
   df <- data.frame(
     sapply(
-      mu, function(x) rgev(MONTHS,location=x,scale=SCALE,shape=SHAPE))
+      mu,
+      function(x) rgev(MONTHS,location=x,scale=SCALE,shape=SHAPE))
   ) %>%
     pivot_longer(
       everything(),
@@ -54,7 +54,7 @@ make_true_data <- function(){
   #   xlab("y") +
   #   ggtitle("distribution of 60 monthly max by station \ntruth data from Gumbel Distribution")
   # # 
-  data_params = list("PHIX"=PHIX,"PHIETA"=PHI, "SIGMA2X"=SIGMA2X,"SIGMA2ETA"=SIGMA2,"BETA1"=BETA1)
+  data_params = list("PHIX"=PHIX,"PHIETA"=PHI, "SIGMA2X"=SIGMA2X,"SIGMA2ETA"=SIGMA2,"ALPHA1"=ALPHA1, "SCALE"=SCALE, "SHAPE"=SHAPE)
   return(
     
     list(
@@ -72,3 +72,9 @@ make_true_data <- function(){
 #   to_save,
 #   file=here::here(paste0("data/sim-gev-4-PHIX",PHIX,"24oct.rds"))
 # )
+
+
+
+
+
+

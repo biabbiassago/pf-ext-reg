@@ -1,8 +1,7 @@
 PHI <- 0.6
 SIGMA2X <- 0.2
-BETA1 <- 1.2
-OBS <- 720 
-MONTHS <- 5
+ALPHA1 <- 1.2
+MONTHS <- 20
 
 if(!exists("SIGMA2")){
   SIGMA2 <- 0.8
