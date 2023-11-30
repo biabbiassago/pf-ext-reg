@@ -1,15 +1,14 @@
 PHI <- 0.6
 SIGMA2X <- 0.2
-BETA1 <- 1.2
-OBS <- 720 
-MONTHS <- 50
+ALPHA1 <- 1.2
+MONTHS <- 20
 
 if(!exists("SIGMA2")){
   SIGMA2 <- 0.8
 }
 
 if(!exists("GAP_SIZE")){
-  GAP_SIZE = 0.05
+  GAP_SIZE = 0.1
 }
 
 if(!exists("PHIX")){
@@ -31,7 +30,7 @@ y_coords <- seq(GAP_SIZE,1.0,by=GAP_SIZE)
 n_coords <- length(x_coords)
 
 true_coords <- expand.grid(x_coords,y_coords)
-N <- dim(true_coords)[1]
+N <- dim(true_coords)[1] # number of stations
 # plot(coords[,1],coords[,2])
 
 distance_mat <- fields::rdist(true_coords)
