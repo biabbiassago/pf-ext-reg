@@ -3,8 +3,7 @@ library(geoR)
 library(extRemes)
 library(patchwork)
 library(sp)
-library(gstat)
-source("src/utils.R")
+source(here::here("src/utils.R"))
 
 # true_data <- read.csv("data/sim1.csv")
 # cur_sample <- xb3$sample_df
@@ -13,9 +12,21 @@ fit_evr_by_station <- function(i,dat){
   
   # fit a EVR to each station with no predictors yet.
   stat_dat <- dat %>% filter(station==i)
-  fit<- fevd(value~1,data=stat_dat)
+  fit<- fevd(value~1,data=stat_dat,verbose=FALSE)
+  
+  est <- fit$results$par["location"]
+  low <- est - qnorm(0.025,lower.tail=F)*summary(fit)$se.theta["location"]
+  hi <- est + qnorm(0.025,lower.tail=F)*summary(fit)$se.theta["location"]
+                         
+  
   # location: 8.166, scale = 1.05, shape = -0.117
-  return(fit$results$par)
+  return(list(
+    "location"= est,
+    # is this correct? normal approx
+    "location_025"= low,
+    "location_975"= hi
+  )
+)
 }
 
 make_pred_df <- function(cur_sample){
@@ -25,7 +36,8 @@ make_pred_df <- function(cur_sample){
     function(x) fit_evr_by_station(x,cur_sample)
   )
   
-  station_mus <- parms_est["location",]
+  station_mus <- unlist(parms_est["location",])
+  print(parms_est)
   
   pred_df <- cur_sample %>%
     group_by(station) %>%
@@ -35,9 +47,9 @@ make_pred_df <- function(cur_sample){
       x_coords=first(x_coords),
       y_coords=first(y_coords),
     ) %>% mutate(
-      loc_par = parms_est["location",],
-      scale_par = parms_est["scale",],
-      shape = parms_est['shape',]
+      loc_par = station_mus,
+      loc_025ci = unlist(parms_est["location_025",]),
+      loc_975ci = unlist(parms_est["location_975",])
     )
   return(pred_df)
 }
@@ -58,9 +70,10 @@ make_pred_df <- function(cur_sample){
 #   return(param_variog)
 # }
 
-predict_location <- function(pred_df){
+predict_location <- function(pred_df,true_coords){
   # use kriging to predict
-  
+  x_coords <- true_coords[,1]
+  x_coords <- true_coords[,2]
   coordinates(pred_df) <- ~ x_coords + y_coords
   #loc_vg <- variogram(loc_par~1, pred_df) # calculates sample variogram values
   

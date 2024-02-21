@@ -36,11 +36,11 @@ make_pred_trend_df <- function(cur_sample){
 
   parms_est <- sapply(
     unique(cur_sample$station),
-    function(x) fit_evr_by_station_trend(x,cur_sample$sample_df)
+    function(x) fit_evr_by_station_trend(x,cur_sample)
   )
 
   station_mus <- parms_est["location",]
-  pred_df <- cur_sample$sample_df %>%
+  pred_df <- df %>%
     group_by(station) %>%
     summarise(
       mean_value = mean(value),
@@ -83,7 +83,7 @@ predict_location <- function(pred_df,krig=TRUE){
       loc_predicted <- krige.conv(
         data = pred_df$loc_par,
         coords=pred_df@coords,
-        locations = true_coords,
+        locations = coordinates(pred_df),
         krige = krige.control(type.krige = "OK",obj.model = value_mean_model),
       )
       cov_pars <- value_mean_model$cov.pars

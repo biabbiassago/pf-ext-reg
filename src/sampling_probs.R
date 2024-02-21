@@ -3,7 +3,7 @@
 
 #true_data <- read.csv("data/sim2.csv")
 
-generate_sampling_probs <- function(b,dat, type="power"){
+generate_sampling_probs <- function(b,dat, type="linear"){
   n <- length(dat$x)
   
   eps <- rnorm(n,0,1)

@@ -27,18 +27,7 @@ sample.mui <- function(
   
   acc_mui <- 0
   
-  
-  ##### CHANGE THIS TO BE ON THE LOG SCALE
-  # target <- function(mu_value){
-  #   return(prod(
-  #     prod(
-  #           (1/sigma)*
-  #           abs(gev_inside(z,mu_value,sigma,xi))^(xi+1)*
-  #           exp(-gev_inside(z,mu_value,sigma,xi))
-  #       )
-  #     )*exp(-1/2*t(mu_value-M)%*%solve(SIGMA)%*%(mu_value-M))
-  #   )
-  # }
+
   
   
   # x is a covariate vector with an observation per each location.
@@ -124,10 +113,8 @@ sample.beta1 <- function(
 
   M <- alpha0 + alpha1*unique(x) 
   n <- length(z)
-  # we want to sample eta = log(beta1)
   
   zmat <- matrix(z,ncol=MONTHS)
-  
   target <- function(beta1_value){
     
     SIGMA <- exp_cov(beta0, beta1_value, distance_mat)
@@ -183,7 +170,7 @@ sample.sigma <- function(
   
   target <- function(sigma_value){
     tvec <- c()
-    for(i in 1:dim(zmat)[1]){i
+    for(i in 1:dim(zmat)[1]){
       tvec[i] <- sum(dgev(zmat[i,],location=mui[i],scale=sigma_value,shape=xi,log = TRUE))
     }
   return(

@@ -11,7 +11,7 @@ max_model <- function(z,x,loc,s,N.iter){
   # distance matrix from the coordinates
   distance_mat <- fields::rdist(loc)
   
-  init.mui <- true_mus
+  init.mui <- rnorm(s,1)
   
   # alpha are the mean parameters
   init.alpha0 <- 0

@@ -6,29 +6,38 @@ library(extRemes)
 library(VGAM)
 source(here::here("src/utils.R"))
 
-SCALE <- 1.5
-SHAPE <- 0
-
-make_true_data <- function(){
+make_true_data <- function(n_stations,months_rep){
+  sim_locs <- sim_random_locs(n_stations)
+  x_coords <- sim_locs$x_coords
+  y_coords <- sim_locs$y_coords
+  distance_mat <- sim_locs$distance_mat
   X <- MASS::mvrnorm(
     1,
-    mu = rep(1,N),
-    Sigma=Sigma_x
+    mu = rep(1,n_stations),
+    Sigma=make_Sigma_x(distance_mat,n_stations)
   )
   
   eta <- MASS::mvrnorm(
     1,
-    mu = rep(0,N),
-    Sigma=Sigma_eta
+    mu = rep(0,n_stations),
+    Sigma=make_Sigma_eta(distance_mat,n_stations)
   )
   
   mu <- ALPHA1 * X + eta
   
+  nu <- MASS::mvrnorm(
+    1,
+    mu = rep(0,n_stations),
+    Sigma=make_Sigma_nu(distance_mat,n_stations)
+  )
+  sigma2 <- exp(nu)
+  
   df <- data.frame(
-    sapply(
-      mu,
-      function(x) rgev(MONTHS,location=x,scale=SCALE,shape=SHAPE))
-  ) %>%
+    apply(
+      cbind(mu,sigma2),1,
+      function(x) rgev(months_rep,location=x["mu"],scale=x["sigma2"],shape=SHAPE)
+      )
+   ) %>%
     pivot_longer(
       everything(),
       names_to = "station"
@@ -38,43 +47,40 @@ make_true_data <- function(){
     ) %>%
     arrange(station) %>%
     mutate(
-      measurements= rep(1:MONTHS,N),
-      x = rep(X,each=MONTHS),
-      eta = rep(eta,each=MONTHS),
-      x_coords = rep(x_coords,each=length(x_coords)*MONTHS),
-      y_coords= rep(rep(y_coords, each = MONTHS),length(y_coords)),
+      measurements= rep(1:months_rep,n_stations),
+      x = rep(X,each=months_rep),
+      eta = rep(eta,each=months_rep),
+      nu = rep(nu, each=months_rep),
+      x_coords = rep(x_coords,each=months_rep),
+      y_coords= rep(y_coords,each=months_rep),
     )
   
-  # df %>%
-  #   filter(station %in% 13:20) %>%
-  #   ggplot(aes(x=value)) +
-  #   geom_density() +
-  #   facet_wrap(~station) +
-  #   theme_bw() +
-  #   xlab("y") +
-  #   ggtitle("distribution of 60 monthly max by station \ntruth data from Gumbel Distribution")
-  # # 
-  data_params = list("PHIX"=PHIX,"PHIETA"=PHI, "SIGMA2X"=SIGMA2X,"SIGMA2ETA"=SIGMA2,"ALPHA1"=ALPHA1, "SCALE"=SCALE, "SHAPE"=SHAPE)
-  return(
-    
-    list(
-      "true_data" = df, 
-      "true_mus" = mu,
-      "data_parms" = data_params)
+  data_params = list(
+    "SIGMA2X"=SIGMA2X,
+    "SIGMA2ETA"=SIGMA2ETA,
+    "SIGMA2NU" = SIGMA2NU,
+    "PHIX"=PHIX,
+    "PHIETA"=PHIETA,
+    "PHINU"=PHINU,
+    "ALPHA0"=0,
+    "ALPHA1"=ALPHA1,
+    "SHAPE"=SHAPE
   )
+  
+  true_data = list(
+    "true_data" = df, 
+    "true_mus" = mu,
+    "true_sigmas" = sigma2,
+    "data_parms" = data_params
+  )
+  
+  return(
+    true_data  
+  )
+  if(save==TRUE){
+    write_rds(
+      true_data,
+      file=here::here(paste0("data/sim-gev",now(),".rds"))
+    )
+  }
 }
-
-
-# to_save <- make_true_data()
-# df<- to_save$true_data
-# 
-# write_rds(
-#   to_save,
-#   file=here::here(paste0("data/sim-gev-4-PHIX",PHIX,"24oct.rds"))
-# )
-
-
-
-
-
-
