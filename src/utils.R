@@ -1,14 +1,21 @@
 library(spatstat)
 
+MCMC_ITERS <- 100000
+
 SCALE <- 1.5
-SHAPE <- 0.1
+SHAPE <- 0.2
 SIGMA2ETA <- 0.2
-PHIETA <- 0.5
-SIGMA2X <- 0.1
-PHIX <- 0.2
+PHIETA <- 0.4
+
+SIGMA2NU <- 1
+PHINU <- 0.3
+
+# SIGMA2X <- 0.1
+# PHIX <- 0.2
+ALPHA0 <- 1
 ALPHA1 <- 1.2
-SIGMA2NU <- 0.05
-PHINU <- 0.1
+RHO0 <- 0.5
+
 
 
 if(!exists("GAP_SIZE")){
@@ -98,15 +105,30 @@ make_Sigma_nu <- function(distance_mat,N){
 
 
 
-make_mean_by_station_df <- function(true_data){
-  mean_by_station <- true_data %>%
-    group_by(station) %>%
-    summarize(
-      mean_value = mean(value),
-      x_coords = first(x_coords),
-      y_coords = first(y_coords),
-      x = first(x)
-    )
+make_mean_by_station_df <- function(true_data,cov=FALSE){
+  if(cov==TRUE){
+    mean_by_station <- true_data %>%
+      group_by(station) %>%
+      summarize(
+        mean_value = mean(value),
+        x_coords = first(x_coords),
+        y_coords = first(y_coords),
+        x = first(x)
+      )    
+  }
+  if(cov==FALSE){
+    mean_by_station <- true_data %>%
+      group_by(station) %>%
+      summarize(
+        mean_value = mean(value),
+        x_coords = first(x_coords),
+        y_coords = first(y_coords),
+        #x = first(x)
+      )
+  }
   return(mean_by_station)
 }
 
+return_levels <- function(mu, sigma, xi, year){
+  return(mu - (sigma/xi)*(1-(-log(1-1/year))^(-xi)))
+}
