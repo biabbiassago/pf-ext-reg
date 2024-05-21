@@ -11,3 +11,9 @@
 *.rdb
 *.RData
 meetings/
+exploratory/
+tmp/
+*.pgn
+img/
+images/
+report/
