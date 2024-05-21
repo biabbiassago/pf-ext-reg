@@ -5,6 +5,9 @@
 .rdb
 .Ruserdata
 .rds
+*.csv
+*.pdf
 *.rds
 *.rdb
 *.RData
+meetings/

@@ -16,11 +16,9 @@ ALPHA0 <- 1
 ALPHA1 <- 1.2
 RHO0 <- 0.5
 
+PREF_VAR <- 1.2
+PREF_SCALE <- 0.7
 
-
-if(!exists("GAP_SIZE")){
-  GAP_SIZE = 0.25
-}
 
 
 # define exponential covariance function
