@@ -13,7 +13,7 @@
 meetings/
 exploratory/
 tmp/
-*.pgn
-img/
+*.png
+imgs/
 images/
 report/
