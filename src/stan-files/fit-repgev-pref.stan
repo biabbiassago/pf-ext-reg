@@ -91,16 +91,6 @@ functions{
     elle_star_value = log(-log(quant));
     return elle_star_value;
   }
-  //real loc_to_median(real mu, real sigma, real xi){
-    //if(xi == 0){
-      //q = mu - sigma*elle_star(0.05);
-    //}
-    //else{
-      //q = mu + sigma*(elle(0.05,xi)-1)/xi
-    //}
-    //return q
-  //}
-  
   real median_to_loc(real q, real iqr, real xi){
     real mu;
     if(xi == 0){
@@ -146,20 +136,26 @@ functions{
     q = mu - (sigma/xi) * (1-pow(-log(1-1/nyear),-xi));
     return q;
   }
-  
+  real poissonpp_lpmf(int[] locs, real lambda, vector log_int, real cell_size){
+    int size_grid;
+    size_grid = dims(locs)[1];
+    vector[size_grid] lp;
+    for(i in 1:size_grid){
+      lp[i] = (lambda + log_int[i])*locs[i]-cell_size*exp(lambda)*exp(log_int[i]);
+    }
+    return sum(lp);
+  }
 }
 data {
   int<lower=0> s;
   int<lower=0> dgrid; 
   real<lower=0> cell_size;
   
-  //array[s] int<lower=0,upper=dgrid> grid_idx;
-  
   int months;
   int N;
   vector[N] z;
   matrix[s, s] DMat; // Distance matrix
-  matrix[dgrid+s, dgrid+s] DFullMat; // Distance of Grid Matrix 
+  matrix[dgrid+s, dgrid+s] DFullMat; // Distance of Grid Matrix and Points
   
   array[dgrid] int locs; // vector with locations of counts by cell
 }
@@ -185,6 +181,7 @@ parameters {
   real xi;
   real phi_mean; // mean of the PS
   real a; // strength of PS
+  real lambda;
 }
 transformed parameters{
   
@@ -237,18 +234,17 @@ model {
   // true values are beta0 0.2 and gamma1 0.4
   // putting a very informative prior on the 
   // range parameter
+  
   target += inv_gamma_lpdf(beta0 | 6, 1);
   target += gamma_lpdf(beta1 | 80, 200);
   
-  //fix
-  // priors on variance and range of the scale par
-  // true values are gamma0 0.1 and gamma1 0.3
+  // gamma0 is not identifiable
   //target += inv_gamma_lpdf(gamma0 | 6, 0.5);
   target += gamma_lpdf(gamma1 | 60, 200);
   
-  target += inv_gamma_lpdf(spref0 | 6, 1);
-  target += gamma_lpdf(spref1 | 180, 200);
-  
+  target += inv_gamma_lpdf(spref0 | 5, 4);
+  target += gamma_lpdf(spref1 | 140, 200);
+
   
   target += normal_lpdf(xi | 0, 0.5);
 
@@ -258,6 +254,7 @@ model {
   
   // preferential sampling stuff
   target += normal_lpdf(a | 1,2); // strength of perf sampling
+  target += normal_lpdf(lambda| 0, 5);
   target += multi_normal_cholesky_lpdf(phi_proc | rep_vector(0,dgrid+s),L_SPHI);
 
   // likelihood
@@ -268,17 +265,14 @@ model {
     pos = pos + months;
   }
   
-  target += poisson_lpmf(locs | cell_size*exp(phi_grid));
+  //target += poisson_lpmf(locs | cell_size*exp(phi_grid));
+  target += poissonpp_lpmf(locs | lambda, phi_proc[1:dgrid],cell_size);
 }
 generated quantities{
   vector[s] ret_10;
   //vector[s] ret_100;
   //vector[s] ret_1000;
-  //vector[s] mu;
-  //vector[s] sigma;
-  
-  //mu = alpha0 + eta;
-  //sigma = exp(rho0 + nu);
+
   ret_10 = return_level(mu, sigma, xi,10.0);
   //ret_100 = return_level(mu, sigma, xi,100.0);
   //ret_1000 = return_level(mu, sigma, xi, 1000.0);

@@ -6,9 +6,6 @@ library(fields)
 source(here::here("src/utils.R"))
 source(here::here("src/rep-gev/reparametrized_gev.R"))
 
-pref_var <- 0.5
-pref_scale <- 0.8
-pref_gp_approx_scale <- 300
 
 make_true_data_pp <-
   function(n_stations,
@@ -21,11 +18,11 @@ make_true_data_pp <-
 
   
     pref_field <- geoR::grf(
-      8000,
+      10000,
       grid = "reg",
       nsim = 1,
       cov.model = "exponential",
-      cov.pars = c(pref_var,pref_scale),
+      cov.pars = c(PREF_VAR,PREF_SCALE),
       message=FALSE
     )
     
@@ -108,6 +105,8 @@ make_true_data_pp <-
       "PHINU" = PHINU,
       "ALPHA0" = ALPHA0,
       "RHO0" = RHO0,
+      "PREF_VAR"=PREF_VAR,
+      "PREF_SCALE"=PREF_SCALE,
       "s" = n_stations,
       "dgrid" = dgrid,
       "months_rep" = months_rep,

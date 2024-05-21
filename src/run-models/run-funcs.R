@@ -1,3 +1,4 @@
+library(dplyr)
 make_stan_data <- function(dat) {
   return(
     list(
