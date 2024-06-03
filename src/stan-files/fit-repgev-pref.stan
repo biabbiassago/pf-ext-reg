@@ -136,14 +136,39 @@ functions{
     q = mu - (sigma/xi) * (1-pow(-log(1-1/nyear),-xi));
     return q;
   }
-  real poissonpp_lpmf(int[] locs, real lambda, vector log_int, real cell_size){
-    int size_grid;
-    size_grid = dims(locs)[1];
-    vector[size_grid] lp;
-    for(i in 1:size_grid){
-      lp[i] = (lambda + log_int[i])*locs[i]-cell_size*exp(lambda)*exp(log_int[i]);
-    }
-    return sum(lp);
+  // real poissonpp_lpmf(int[] locs, real lambda, vector log_int, real cell_size){
+  //   int size_grid;
+  //   size_grid = dims(locs)[1];
+  //   vector[size_grid] lp;
+  //   for(i in 1:size_grid){
+  //     lp[i] = (lambda + log_int[i])*locs[i]-cell_size*exp(lambda)*exp(log_int[i]);
+  //   }
+  //   return sum(lp);
+  // }
+  real poissonpp_lpmf(int[] locs, real lambda, vector log_int, real cell_size, int N){
+      int size_grid = dims(locs)[1];
+      int k;
+      vector[size_grid] gridlp;
+      vector[N] pointlp;
+      vector[N] regconst;
+      real lp;
+      
+      for(i in 1:size_grid){
+        gridlp[i] = cell_size*exp(lambda+log_int[i]);
+      }
+      
+
+      for(j in 1:N){
+        k = size_grid+j;
+        pointlp[j] = (lambda+log_int[k]);
+      }
+      
+      for(m in 1:N){
+        regconst[m] = log(m);
+      }
+      //lp = -log(tgamma(N+1)) - sum(gridlp) + sum(pointlp);
+      lp = -sum(regconst) - sum(gridlp) + sum(pointlp);
+      return lp;
   }
 }
 data {
@@ -181,7 +206,6 @@ parameters {
   real xi;
   real phi_mean; // mean of the PS
   real a; // strength of PS
-  real lambda;
 }
 transformed parameters{
   
@@ -254,7 +278,7 @@ model {
   
   // preferential sampling stuff
   target += normal_lpdf(a | 1,2); // strength of perf sampling
-  target += normal_lpdf(lambda| 0, 5);
+  target += normal_lpdf(phi_mean| 0, 5);
   target += multi_normal_cholesky_lpdf(phi_proc | rep_vector(0,dgrid+s),L_SPHI);
 
   // likelihood
@@ -266,7 +290,7 @@ model {
   }
   
   //target += poisson_lpmf(locs | cell_size*exp(phi_grid));
-  target += poissonpp_lpmf(locs | lambda, phi_proc[1:dgrid],cell_size);
+  target += poissonpp_lpmf(locs | phi_mean, phi_proc,cell_size, s);
 }
 generated quantities{
   vector[s] ret_10;
