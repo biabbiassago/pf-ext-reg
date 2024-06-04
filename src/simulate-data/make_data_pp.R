@@ -54,6 +54,8 @@ make_true_data_pp <-
       mutate(id = assign_regular_ids(dimxy)) %>% arrange(id)
     DFullMat <- st_distance(c(st_centroid(ysf)$geometry,q$geom))
     
+    #p1 <- ggplot(field_sf)+ geom_sf(aes(color=data)) + scale_color_viridis_c(direction=-1) + geom_sf(data=q) + theme_minimal()
+    
     eta <- MASS::mvrnorm(1,
                          mu = rep(0, n_stations),
                          Sigma = make_Sigma_eta(DMat, n_stations))
@@ -78,6 +80,7 @@ make_true_data_pp <-
     }
     
     
+
     df <- data.frame(apply(gev_pars, 1,
                            function(x)
                              rgev(
@@ -88,7 +91,7 @@ make_true_data_pp <-
                              ))) %>%
       pivot_longer(everything(),
                    names_to = "station") %>%
-      mutate(station = parse_number(station),) %>%
+      mutate(station = parse_number(station)) %>%
       arrange(station) %>%
       mutate(
         measurements = rep(1:months_rep, n_stations),
@@ -111,7 +114,8 @@ make_true_data_pp <-
       "dgrid" = dgrid,
       "months_rep" = months_rep,
       "locs_counts" = locs_counts,
-      "DIMXY" = dimxy
+      "DIMXY" = dimxy,
+      "a"=a
     )
     
     distance_mats = list("DMat" = DMat,
