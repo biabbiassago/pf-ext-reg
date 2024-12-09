@@ -1,7 +1,8 @@
 source(here::here("src/exact-inference/exact-gev/sim-data.R"))
 
+#FILENAME <- paste0("test",k)
 start <- Sys.time()
-OUT_FILE_LOC <- here::here("outputs/mcmc-exact/gev-rewritetest.rds")
+OUT_FILE_LOC <- here::here(paste0("outputs/mcmc-exact/",FILENAME,".rds"))
 
 # Simulate data
 sim_data <- make_sim_data_max(true_lambda_star = 250)
