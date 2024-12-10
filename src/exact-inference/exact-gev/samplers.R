@@ -323,7 +323,7 @@ sample_nu <-
     return(list(nu = nu_cur, nu_acc = nu_acc))
   }
 target_nu <-
-  function(nu,
+  function(nu_tmp,
            eta,
            xi,
            S_n,
