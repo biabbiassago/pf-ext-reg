@@ -334,7 +334,7 @@ target_nu <-
       cbind(
         "y" = y,
         "q" = eta + S_n,
-        "sb" = rep(exp(nu), length(y)),
+        "sb" = rep(exp(nu_tmp), length(y)),
         "xi" = rep(xi, length(y))
       )
     
