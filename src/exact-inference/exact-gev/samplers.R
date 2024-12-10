@@ -342,7 +342,7 @@ target_nu <-
       dbgev2(x["y"], x["q"], x["sb"], x["xi"], log = T)
     }))
     
-    t2 <- (-1 / 2) * (nu - prior_nu_mean) ^ 2 / prior_nu_var
+    t2 <- (-1 / 2) * (nu_tmp - prior_nu_mean) ^ 2 / prior_nu_var
     return(t1 + t2)
   }
 
