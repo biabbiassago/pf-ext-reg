@@ -77,10 +77,6 @@ sample_Sk_ess <- function(S_k_cur,
   
   u <- runif(1)
   
-  # tmp <- adapt_Sk_size(S_k_cur,rho_S, sigma2_S, all_coords_prev,all_coords_new,littlen)
-  # S_k_cur_sized <- tmp$S_k
-  # R_old_sized <- tmp$R_S
-  # R_old_inv_sized <- chol2inv(chol(R_old_sized))
   
   S_k_cur_atnew <-
     get_Sk_atnew(S_k_cur,
