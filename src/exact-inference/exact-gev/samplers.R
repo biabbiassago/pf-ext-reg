@@ -77,7 +77,7 @@ sample_Sk_ess <- function(S_k_cur,
   
   u <- runif(1)
   
-  
+  # Conditional on the S_k vector at the previous, we get the values at the new locations.
   S_k_cur_atnew <-
     get_Sk_atnew(S_k_cur,
                  rho_S,
