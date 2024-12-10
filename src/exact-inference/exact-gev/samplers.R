@@ -1,6 +1,7 @@
 source(here::here("src/bGEV/bGEVcode.R"))
 
-#### Poisson Process Part ####
+
+#### Poisson Process Part Samplers ####
 sample_lambda_star <-
   function(k_cur,
            lambda_prior_a,
