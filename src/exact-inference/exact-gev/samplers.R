@@ -104,6 +104,7 @@ sample_Sk_ess <- function(S_k_cur,
   theta_max <- theta
   
   ess_sk_targ <- function(theta) {
+     # this auxiliary function generates a "proposal" S_k and the associated likelihood value to compare to the previous one.
     S_k_new <- S_k_cur_atnew * cos(theta) + ellipse_ess * sin(theta)
     # p(data|S_k_new)) (logscale)
     tmp_targ <-
