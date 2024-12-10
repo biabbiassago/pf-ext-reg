@@ -300,7 +300,7 @@ target_eta <-
       dbgev2(x["y"], x["q"], x["sb"], x["xi"], log = T)
     }))
     
-    t2 <- (-1 / 2) * (eta - prior_eta_mean) ^ 2 / prior_eta_var
+    t2 <- (-1 / 2) * (eta_tmp - prior_eta_mean) ^ 2 / prior_eta_var
     return(t1 + t2)
   }
 sample_nu <-
