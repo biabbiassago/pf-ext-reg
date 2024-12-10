@@ -391,7 +391,7 @@ target_xi <-
     t1 <- sum(apply(tmp, 1, function(x) {
       dbgev2(x["y"], x["q"], x["sb"], x["xi"], log = T)
     }))
-    t2 <- dlnorm(xi_tmp, prior_xi_mean, prior_xi_var)
+    t2 <- dlnorm(xi_tmp, prior_xi_mean, sdlog=sqrt(prior_xi_var))
     return(t1 + t2)
   }
 
