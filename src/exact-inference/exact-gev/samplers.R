@@ -135,6 +135,7 @@ sample_Sk_ess <- function(S_k_cur,
     ess_step <- ess_sk_targ(theta)
     tmp_targ <- ess_step$t
   }
+   # only once tmp_targ > log(y) , exit the while loop and return the new value of S_k
   return(ess_step$s)
 }
 
