@@ -45,7 +45,7 @@ sample_all_coords <-
     disc_coords <-
       coords(pp)[(sapply(probs, function(x) {
         rbinom(1, 1, x)
-      }) == T), ]
+      }) == T),]
     all_coords <- rbind(obs_coords, disc_coords)
     return(all_coords)
   }
@@ -64,8 +64,7 @@ sample_Sk_ess <- function(S_k_cur,
                           lambda_star,
                           obs_coords,
                           all_coords_prev,
-                          all_coords_new,
-                          area_B = 1) {
+                          all_coords_new) {
   k_new <- dim(all_coords_new)[1]
   R <-
     fields::Matern(fields::rdist(all_coords_new),
@@ -87,7 +86,6 @@ sample_Sk_ess <- function(S_k_cur,
                  littlen)
   logy <-
     lik_Sk(S_k_cur_atnew,
-           R_inv,
            beta,
            sigma2_S,
            eta,
@@ -109,7 +107,6 @@ sample_Sk_ess <- function(S_k_cur,
     # p(data|S_k_new)) (logscale)
     tmp_targ <-
       lik_Sk(S_k_new,
-             R_inv,
              beta,
              sigma2_S,
              eta,
@@ -150,7 +147,7 @@ get_Sk_atnew <-
     k_new <- dim(all_coords_new)[1] # k[i]
     
     # discarded coordinates at iteration i
-    disc_coords <- all_coords_new[(littlen + 1):k_new,]
+    disc_coords <- all_coords_new[(littlen + 1):k_new, ]
     
     # Here i generate S_k_cur AT THE NEW LOCATIONS conditional on the previous ones
     big_coords <- rbind(all_coords_prev, disc_coords)
@@ -196,7 +193,6 @@ sample_Sk_mh <- function(S_k_cur,
 
 lik_Sk <-
   function(S_k_tmp,
-           R_inv_tmp,
            beta,
            sigma2_S,
            eta,

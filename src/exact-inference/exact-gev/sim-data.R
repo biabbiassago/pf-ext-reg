@@ -10,9 +10,9 @@ source(here::here("src/rep-gev/reparametrized_gev.R"))
 make_sim_data_max <-
   function(beta = 2,
            true_lambda_star = 300,
-           true_eta = 2.5,
+           true_eta = 4,
            true_nu = 1,
-           true_sigma2_S = 3,
+           true_sigma2_S = 2.5,
            true_rho_S = 0.2, 
            true_sigma2_T = 0.8, # will be ignored if `varying_range=F`
            true_rho_T = 0.3, # will be ignored if `varying_range=F`
@@ -73,7 +73,7 @@ make_sim_data_max <-
       list(
         y = y,
         obs_coords = obs_coords,
-        littlen = littlen,
+        littlen = n,
         y_all = y_all,
         true_q = q_all,
         true_log_r = log_r_all,

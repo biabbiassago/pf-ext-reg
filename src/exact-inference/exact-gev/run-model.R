@@ -1,6 +1,6 @@
 source(here::here("src/exact-inference/exact-gev/sim-data.R"))
 
-#FILENAME <- paste0("test",k)
+FILENAME <- "test"
 start <- Sys.time()
 OUT_FILE_LOC <- here::here(paste0("outputs/mcmc-exact/",FILENAME,".rds"))
 

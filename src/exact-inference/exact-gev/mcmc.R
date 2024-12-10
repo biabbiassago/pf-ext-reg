@@ -2,6 +2,7 @@ source(here::here("src/exact-inference/exact-gev/samplers.R"))
 source(here::here("src/exact-inference/exact-gev/constants.R"))
 
 gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
+  
   # Initialize Chains
   littlen <- dim(obs_coords)[1]
   lambda_star <- c(100)
@@ -11,13 +12,13 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
   k <- c(dim(all_coords)[1])
   beta <- c(0)
   beta_acc_rate <- c(1)
-  ## GEV Level 2 pars
   eta <- c(median(y))
   eta_acc_rate <- c(1)
   nu <- c(log(IQR(y)))
   nu_acc_rate <- c(1)
   xi <- c(0.5)
   xi_acc_rate <- c(1)
+  
   ## GEV Random Effects on Median
   R <-
     fields::Matern(fields::rdist(all_coords),
@@ -94,10 +95,11 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
         lambda_star[i],
         obs_coords,
         all_coords_prev,
-        all_coords,
-        area_B = 1
+        all_coords
       )
     S_n[, i] <- S_k[1:littlen]
+    
+    # Note, I am computing this twice (once in the elliptical slice sampler and one here. Fix.)
     R_S <-
       fields::Matern(fields::rdist(all_coords),
                      range = rho_S[i - 1],
@@ -194,7 +196,7 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
     beta = paste0("n(", PRIOR_BETA_MEAN, ",", PRIOR_BETA_VAR, ")")
   )
   
-  ## save to a list.
+  # save everything to a list.
   tmp_results <-   list(
     lambda_star = lambda_star,
     k = k,
