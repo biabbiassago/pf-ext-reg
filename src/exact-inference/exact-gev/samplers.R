@@ -170,6 +170,8 @@ get_Sk_atnew <-
     cond_Sigma <- Sigma_22 - Sigma_21 %*% Sigma_11_inv %*% Sigma_12
     #
     disc_Sk_for_current <- MASS::mvrnorm(1, cond_mean, cond_Sigma)
+    
+    # recall: the first littlen elements remain the same (same, observed locations).
     S_k_cur_atnew <- c(S_k_cur[1:littlen], disc_Sk_for_current)
     return(S_k_cur_atnew)
   }
