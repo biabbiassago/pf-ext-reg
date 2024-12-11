@@ -6,14 +6,13 @@ library(spatstat)
 source(here::here("src/rep-gev/reparametrized_gev.R"))
 
 
-
 make_sim_data_max <-
   function(beta = 2,
            true_lambda_star = 300,
            true_eta = 4,
            true_nu = 1,
            true_sigma2_S = 2.5,
-           true_rho_S = 0.2, 
+           true_rho_S = 0.15, 
            true_sigma2_T = 0.8, # will be ignored if `varying_range=F`
            true_rho_T = 0.3, # will be ignored if `varying_range=F`
            true_xi=0.1,

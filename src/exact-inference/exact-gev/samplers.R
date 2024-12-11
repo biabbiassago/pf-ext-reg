@@ -78,7 +78,7 @@ sample_Sk_ess <- function(S_k_cur,
   
   # Conditional on the S_k vector at the previous, we get the values at the new locations.
   S_k_cur_atnew <-
-    get_Sk_atnew(S_k_cur,
+    get_raneff_atnew(S_k_cur,
                  rho_S,
                  sigma2_S,
                  all_coords_prev,
@@ -136,7 +136,7 @@ sample_Sk_ess <- function(S_k_cur,
   return(ess_step$s)
 }
 
-get_Sk_atnew <-
+get_raneff_atnew <-
   function(S_k_cur,
            rho_S,
            sigma2_S,
@@ -174,7 +174,6 @@ get_Sk_atnew <-
   }
 
 sample_Sk_mh <- function(S_k_cur,
-                         R_inv_cur,
                          beta,
                          sigma2_S,
                          rho_S,
@@ -185,11 +184,42 @@ sample_Sk_mh <- function(S_k_cur,
                          littlen,
                          obs_coords,
                          all_coords_prev,
-                         all_coords_cur) {
-  # TODO
+                         all_coords_new) {
+  k_new <- dim(all_coords_new)[1]
+  S_k_cur_atnew <-
+    get_Sk_atnew(S_k_cur,
+                 rho_S,
+                 sigma2_S,
+                 all_coords_prev,
+                 all_coords_new,
+                 littlen)
   
+  S_k_acc <- 0
+  R_prop <-
+    fields::Matern(fields::rdist(all_coords_new),
+                   range = 0.15,
+                   smoothness = 1)
+  SIGMA_PROP <- 0.8 * R_prop
+  S_k_prop <- MASS::mvrnorm(1, mu = S_k_cur_atnew, Sigma = SIGMA_PROP)
   
+  R_S <-
+    fields::Matern(fields::rdist(all_coords_new),
+                   range = rho_S,
+                   smoothness = 1)
+  
+  R_S_inv <- chol2inv(chol(R_S))
+  Sigma_S <- sigma2_S*R_S
+  log_mh_ratio <-
+    target_Sk(S_k_prop, R_S_inv, beta, sigma2_S, eta, nu, xi, y, littlen, k_new) - target_Sk(S_k_cur_atnew, R_S_inv, beta, sigma2_S, eta, nu, xi, y, littlen, k_new)
+  
+  # accept or reject step
+  if (runif(1) < exp(log_mh_ratio)*Jacobian_det_jump_mh(Sigma_S,k_new)) {
+    S_k_acc <- 1
+    S_k_cur_atnew <- S_k_prop
+  }
+  return(list(S_k = S_k_cur_atnew, S_k_acc = S_k_acc))
 }
+
 
 lik_Sk <-
   function(S_k_tmp,
@@ -219,7 +249,7 @@ lik_Sk <-
     
     #t3 <- (-lambda_star) + k*(lambda_star) - sum(log(seq(1:k)))
     return(t1 + t2)
-  }
+}
 
 target_Sk <-
   function(S_k_tmp,
@@ -277,7 +307,7 @@ sample_eta <-
   }
 
 target_eta <-
-  function(eta,
+  function(eta_tmp,
            nu,
            xi,
            S_n,
@@ -287,7 +317,7 @@ target_eta <-
     tmp <-
       cbind(
         "y" = y,
-        "q" = eta + S_n,
+        "q" = eta_tmp + S_n,
         "sb" = rep(exp(nu), length(y)),
         "xi" = rep(xi, length(y))
       )
@@ -578,3 +608,15 @@ target_beta_log <-
     return(sum(pnorm((beta / sigma) * I_k * S_k, log = T)) +
              dnorm(beta, beta_prior_mean, sqrt(beta_prior_var), log = T))
   }
+
+
+
+
+Jacobian_det_jump_mh <- function(Sigma_cur, k_new){
+  
+  J <- matrix(NA, nrow=k_new, ncol=k_new)
+  J <- - Sigma_cur
+  diag(J) <- 1
+  return(abs(det(J)))
+  
+}

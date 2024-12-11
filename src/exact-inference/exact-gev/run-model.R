@@ -1,11 +1,14 @@
 source(here::here("src/exact-inference/exact-gev/sim-data.R"))
+source(here::here("src/exact-inference/exact-gev/mcmc.R"))
 
-FILENAME <- "test"
+args <- commandArgs(trailingOnly=TRUE)
+qq <- ifelse(is.na(args[1]),"any",args[1])
+FILENAME <- paste0("largecheck-gev-exact-",qq)
 start <- Sys.time()
 OUT_FILE_LOC <- here::here(paste0("outputs/mcmc-exact/",FILENAME,".rds"))
 
 # Simulate data
-sim_data <- make_sim_data_max(true_lambda_star = 250)
+sim_data <- make_sim_data_max(true_lambda_star = 300)
 obs_coords <- sim_data$obs_coords
 y <- sim_data$y
 

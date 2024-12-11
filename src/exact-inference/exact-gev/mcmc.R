@@ -1,7 +1,8 @@
 source(here::here("src/exact-inference/exact-gev/samplers.R"))
 source(here::here("src/exact-inference/exact-gev/constants.R"))
+source(here::here("src/exact-inference/exact-gev/posterior-preds.R"))
 
-gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
+gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc, pred_coords = NULL, save=T) {
   
   # Initialize Chains
   littlen <- dim(obs_coords)[1]
@@ -36,13 +37,21 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
   rho_S <- c(0.3)
   rho_S_acc_rate <- c(1)
   
-  
-  
+  # Kriging stuff
+  if(!(is.null(pred_coords))){
+    k_pred <- dim(pred_coords)[1]
+    S_pred <- matrix(NA, nrow = k_pred, ncol = nsims)
+    S_pred[,1] <- get_S_predlocs(rho_S[1], S_k, coords_pred,all_coords)
+  }
+  else if(is.null(pred_coords)){
+    S_pred <- NULL
+  }
+ 
   #### START RUNNING THE MCMC ITERATIONS #####
   for (i in 2:nsims) {
     #print(i)
     if ((i %% 1000) == 0) {
-      cur_info_print(i)
+      print(i)
       tmp <-   list(
         lambda_star = lambda_star,
         k = k,
@@ -55,6 +64,7 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
         rho_S = rho_S,
         sim_data = sim_data
       )
+      cur_info_print(i,tmp)
       saveRDS(tmp, here::here("outputs/mcmc-exact/tmp.rds"))
     }
     
@@ -184,6 +194,12 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
       )
     beta[i] <- beta_tmp$beta
     beta_acc_rate[i] <- beta_tmp$beta_acc
+    
+    
+    # Step 8 : Kriging
+    if(!(is.null(pred_coords))){
+      S_pred[,i] <- get_S_predlocs(rho_S[i], S_k, coords_pred,all_coords)
+    }
   }
   
   set_priors = list(
@@ -195,7 +211,6 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
     rho = paste0("Gamma(", PRIOR_RHO_S_A, ",", PRIOR_RHO_S_B, ")"),
     beta = paste0("n(", PRIOR_BETA_MEAN, ",", PRIOR_BETA_VAR, ")")
   )
-  
   # save everything to a list.
   tmp_results <-   list(
     lambda_star = lambda_star,
@@ -207,7 +222,9 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
     S_n = S_n,
     sigma2_S = sigma2_S,
     rho_S = rho_S,
+    S_pred = S_pred,
     sim_data = sim_data,
+    pred_coords = pred_coords,
     other_summaries = list(
       eta_acc_rate = eta_acc_rate,
       nu_acc_rate = nu_acc_rate,
@@ -219,18 +236,20 @@ gev_exact_mcmc <- function(y, obs_coords, nsims, out_file_loc) {
     )
   )
   # Save Results to disk.
-  saveRDS(tmp_results, out_file_loc)
+  if(save==T){
+    saveRDS(tmp_results, out_file_loc)  
+  }
   return(tmp_results)
 }
 
-cur_info_print <- function(i) {
-  print(paste0("sigma2_S: ", sigma2_S[i - 1]))
-  print(paste0("eta: ", eta[i - 1]))
-  print(paste0("nu: ", nu[i - 1]))
-  print(paste0("xi: ", xi[i - 1]))
-  print(paste0("lambda_star ", lambda_star[i - 1]))
-  print(paste0("rho_S ", rho_S[i - 1]))
-  print(paste0("beta ", beta[i - 1]))
-  print(paste0("Sn_1: ", S_n[1, i - 1]))
-  print(paste0("Sn_2: ", S_n[2, i - 1]))
+cur_info_print <- function(i,tmp) {
+  print(paste0("sigma2_S: ", tmp$sigma2_S[i - 1]))
+  print(paste0("eta: ", tmp$eta[i - 1]))
+  print(paste0("nu: ", tmp$nu[i - 1]))
+  print(paste0("xi: ", tmp$xi[i - 1]))
+  print(paste0("lambda_star ", tmp$lambda_star[i - 1]))
+  print(paste0("rho_S ", tmp$rho_S[i - 1]))
+  print(paste0("beta ", tmp$beta[i - 1]))
+  print(paste0("Sn_1: ", tmp$S_n[1, i - 1]))
+  print(paste0("Sn_2: ", tmp$S_n[2, i - 1]))
 }
